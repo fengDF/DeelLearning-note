@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<!-- saved from url=(0048)https://www.cnblogs.com/guoyaohua/p/9429924.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="origin">
+    <title>【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园</title>
+<meta property="og:description" content="最近一直在研究深度语义匹配算法，搭建了个模型，跑起来效果并不是很理想，在分析原因的过程中，发现注意力模型在解决这个问题上还是很有帮助的，所以花了两天研究了一下。 此文大部分参考深度学习中的注意力机制(">
+    <link type="text/css" rel="stylesheet" href="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/bundle-CodingLife.css">
+<link type="text/css" rel="stylesheet" href="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/370717.css">
+<link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/bundle-CodingLife-mobile.css">
+    <link title="RSS" type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/guoyaohua/rss">
+    <link title="RSD" type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/guoyaohua/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/guoyaohua/wlwmanifest.xml">
+    <script src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/osd.js.下载"></script><script src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/pubads_impl_rendering_308.js.下载"></script><script async="" src="https://www.google-analytics.com/analytics.js"></script><script src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/jquery-2.2.0.min.js.下载"></script>
+    <script>var currentBlogId=370717;var currentBlogApp='guoyaohua',cb_enable_mathjax=true;var isLogined=false;</script>
+    <script type="text/x-mathjax-config;executed=true">
+    MathJax.Hub.Config({
+        tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']], processClass: 'math', processEscapes: true },
+        TeX: { 
+            equationNumbers: { autoNumber: ['AMS'], useLabelIds: true }, 
+            extensions: ['extpfeil.js'],
+            Macros: {bm: "\\boldsymbol"}
+        },
+        'HTML-CSS': { linebreaks: { automatic: true } },
+        SVG: { linebreaks: { automatic: true } }
+        });
+    </script><script src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/MathJax.js.下载"></script>
+<script src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/blog-common.js.下载" type="text/javascript"></script>
+<link rel="shortcut icon" href="https://files.cnblogs.com/files/guoyaohua/favicon.ico"><style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><link rel="preload" href="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/f.txt" as="script"><script type="text/javascript" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/f.txt"></script><script src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/pubads_impl_308.js.下载" async=""></script><link rel="prefetch" href="https://tpc.googlesyndication.com/safeframe/1-0-32/html/container.html"><style type="text/css">@font-face {
+  font-family: 'rbicon';
+  src: url(chrome-extension://dipiagiiohfljcicegpgffpbnjmgjcnf/fonts/rbicon.woff2) format("woff2");
+  font-weight: normal;
+  font-style: normal; }
+</style></head>
+<body><div id="MathJax_Message" style="display: none;"></div>
+<a name="top"></a>
+
+<!--PageBeginHtml Block Begin-->
+<!--GitHub-->
+<a href="https://github.com/guoyaohua" target="_blank">
+　　<img style="position: fixed; top: 0; right: 0; border: 0; z-index: 1;" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/o_github.png">
+</a>
+<!--火箭-->
+<style>
+#back-top {
+     position: fixed;
+     bottom: 10px;
+     right: 5px;
+     z-index: 99;
+}
+#back-top span {
+     width: 50px;
+     height: 64px;
+     display: block;
+     background:url(http://images.cnblogs.com/cnblogs_com/seanshao/855033/o_rocket.png) no-repeat center center;
+}
+#back-top a{outline:none}
+</style>
+<script type="text/javascript">
+$(function() {
+	// hide #back-top first
+	$("#back-top").hide();
+	// fade in #back-top
+	$(window).scroll(function() {
+		if ($(this).scrollTop() > 500) {
+			$('#back-top').fadeIn();
+		} else {
+			$('#back-top').fadeOut();
+		}
+	});
+	// scroll body to 0px on click
+	$('#back-top a').click(function() {
+		$('body,html').animate({
+			scrollTop: 0
+		}, 800);
+		return false;
+	});
+});
+</script>
+<p id="back-top" style=""><a href="https://www.cnblogs.com/guoyaohua/p/9429924.html#top"><span></span></a></p>
+<!--PageBeginHtml Block End-->
+
+<!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+	<a id="lnkBlogLogo" href="https://www.cnblogs.com/guoyaohua/"><img id="blogLogo" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/logo.gif" alt="返回主页"></a>			
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle" href="https://www.cnblogs.com/guoyaohua/">郭耀华's Blog</a></h1>
+<h2>欲穷千里目，更上一层楼<br>
+项目主页：<a href="https://github.com/guoyaohua/">https://github.com/guoyaohua/</a></h2>
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">博客园</a></li>
+<li><a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/guoyaohua/">首页</a></li>
+<li><a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a></li>
+<li><a id="blog_nav_contact" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/%E9%83%AD%E8%80%80%E5%8D%8E">联系</a></li>
+<li><a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/guoyaohua/rss">订阅</a>
+<!--<a id="blog_nav_rss_image" class="aHeaderXML" href="https://www.cnblogs.com/guoyaohua/rss"><img src="//www.cnblogs.com/images/xml.gif" alt="订阅" /></a>--></li>
+<li><a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a></li>
+</ul>
+		<div class="blogStats">
+			
+			<div id="blog_stats">
+<span id="stats_post_count">随笔 - 154&nbsp; </span>
+<span id="stats_article_count">文章 - 0&nbsp; </span>
+<span id="stats-comment_count">评论 - 44</span>
+</div>
+			
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+        <div id="post_detail">
+<!--done-->
+<div id="topics">
+	<div class="post">
+		<h1 class="postTitle">
+			<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/guoyaohua/p/9429924.html">【NLP】Attention Model（注意力模型）学习总结</a>
+		</h1>
+		<div class="clear"></div>
+		<div class="postBody">
+			<div id="cnblogs_post_body" class="blogpost-body"><blockquote>
+<p>　　最近一直在研究深度语义匹配算法，搭建了个模型，跑起来效果并不是很理想，在分析原因的过程中，发现注意力模型在解决这个问题上还是很有帮助的，所以花了两天研究了一下。</p>
+<p>　　此文大部分参考<a href="https://blog.csdn.net/malefactor/article/details/78767781">深度学习中的注意力机制(2017版)</a>&nbsp;张俊林的博客，不过添加了一些个人的思考与理解过程。在github上找到一份基于keras框架实现的可运行的注意模型代码：<strong><a href="https://github.com/Choco31415/Attention_Network_With_Keras" target="_blank">Attention_Network_With_Keras</a>。如有不足之处，欢迎交流指教。</strong></p>
+<p>　　注意力模型：对目标数据进行加权变化。人脑的注意力模型，说到底是一种资源分配模型，在某个特定时刻，你的注意力总是集中在画面中的某个焦点部分，而对其它部分视而不见。 ------（思考：为什么要集中在那个部分，是因为那个部分能解决问题吗？）</p>
+</blockquote>
+<h1>1. 什么是Attention机制？</h1>
+<p>　　最近两年，注意力模型（Attention Model）被广泛使用在自然语言处理、图像识别及语音识别等各种不同类型的深度学习任务中，是深度学习技术中最值得关注与深入了解的核心技术之一。</p>
+<p>　　当我们人在看一样东西的时候，我们当前时刻关注的一定是我们当前正在看的这样东西的某一地方，换句话说，当我们目光移到别处时，注意力随着目光的移动也在转移，这意味着，当人们注意到某个目标或某个场景时，该目标内部以及该场景内每一处空间位置上的注意力分布是不一样的。---------（思考：对于图片，会有些特别显眼的场景会率先吸引住注意力，那是因为脑袋中对这类东西很敏感。对于文本，我们大都是带目的性的去读，顺序查找，顺序读，但是在理解的过程中，我们是根据我们自带的目的去理解，去关注的。 注意力模型应该与具体的目的(或者任务)相结合。）</p>
+<p>　　从Attention的作用角度出发，我们就可以从两个角度来分类Attention种类：<strong>Spatial Attention 空间注意力</strong>和<strong>Temporal Attention 时间注意力</strong>。更具实际的应用，也可以将Attention分为<strong>Soft Attention</strong>和<strong>Hard Attention</strong>。<span style="background-color: #ffff99;"><strong>Soft Attention是所有的数据都会注意，都会计算出相应的注意力权值，不会设置筛选条件。Hard Attention会在生成注意力权重后筛选掉一部分不符合条件的注意力，让它的注意力权值为0，即可以理解为不再注意这些不符合条件的部分。</strong></span></p>
+<h1>2. 先了解编码-解码框架：Encoder-Decoder框架</h1>
+<p>　　目前绝大多数文献中出现的AM模型是附着在Encoder-Decoder框架下的，当然，其实AM模型可以看作一种通用的思想，本身并不依赖于Encoder-Decoder模型，这点需要注意。<strong>Encoder-Decoder框架可以看作是一种文本处理领域的研究模式</strong>，应用场景异常广泛，本身就值得细谈。</p>
+<p><img style="display: block; margin-left: auto; margin-right: auto;" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806135448102-667913176.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #888888;">图1 抽象的Encoder-Decoder框架</span></p>
+<p>　　Encoder-Decoder框架可以这么直观地去理解：可以把它看作适合处理由一个句子（或篇章）生成另外一个句子（或篇章）的通用处理模型。对于句子对&lt;X,Y&gt;。 --------（思考：&lt;X,Y&gt;对很通用，X是一个问句，Y是答案；X是一个句子，Y是抽取的关系三元组；X是汉语句子，Y是汉语句子的英文翻译。等等），我们的目标是给定输入句子X，期待通过Encoder-Decoder框架来生成目标句子Y。X和Y可以是同一种语言，也可以是两种不同的语言。而X和Y分别由各自的单词序列构成：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806141247005-858346593.png" alt=""></p>
+<p>　　Encoder顾名思义就是对输入句子X进行编码，将输入句子通过非线性变换转化为中间语义表示C：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806141320980-818442456.png" alt=""></p>
+<p>　　对于解码器Decoder来说，其任务是根据句子X的中间语义表示C和之前已经生成的历史信息y1,y2….yi-1来生成i时刻要生成的单词yi ：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806141350194-1066590310.png" alt=""></p>
+<p>　　每个yi都依次这么产生，那么看起来就是整个系统根据输入句子X生成了目标句子Y。 ------（思考：其实这里的Encoder-Decoder是一个序列到序列的模型seq2seq，这个模型是对顺序有依赖的。）</p>
+<p>　　Encoder-Decoder是个非常通用的计算框架，至于Encoder和Decoder具体使用什么模型都是由研究者自己定的，常见的比如 CNN / RNN / BiRNN / GRU / LSTM / Deep LSTM 等，这里的变化组合非常多。 ------（思考：人的学习过程包括输入、输出、外界评价。Encoder模型类似于人的输入学习过程，Decoder模型类似于人的输出学习过程，对输出的内容进行评价就类似于损失函数。英语老师给我上了几堂英语课，我在不断的输入Encoder；突然有一个随堂测试，我得做题输出Decoder；最后英语老师改卷子，给我一个分数，不对的地方我得反思调整我对输入数据的加工方式。）-------（再思考：关于英语翻译。课本上的单词和课文是原始数据输入，相当于X；我在大脑里加工这些数据，相当于Encoder模型，我的脑子里有很多加工后的数据，相当于C；现在要让我翻译一个英语句子，这个任务相当于Y，我不能翻课本，所以我只能借助我脑袋里加工的数据C去翻译这个句子，即我得动脑子，相当于Decoder。 学习的过程是什么都要学，要分类整理，要增加线索，并不知道未来的某天能用到什么，所以Encoder-Decoder是一个泛泛学习的框架）</p>
+<h1>3. Attention Model</h1>
+<p>　　以上介绍的Encoder-Decoder模型是没有体现出“注意力模型”的，所以可以把它看作是注意力不集中的分心模型。为什么说它注意力不集中呢？请观察下目标句子Y中每个单词的生成过程如下：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806141638641-1078830067.png" alt=""></p>
+<p>　　其中<strong>f是decoder的非线性变换函数</strong>。从这里可以看出，在生成目标句子的单词时，不论生成哪个单词，是y1,y2也好，还是y3也好，他们使用的句子X的语义编码C都是一样的，没有任何区别。而语义编码C是由句子X的每个单词经过Encoder 编码产生的，这意味着不论是生成哪个单词，y1,y2还是y3，其实<span style="background-color: #ffff99;"><strong>句子X中任意单词对生成某个目标单词yi来说影响力都是相同的，没有任何区别</strong></span>（<span style="background-color: #ffff99;">其实如果Encoder是RNN的话，理论上越是后输入的单词影响越大，并非等权的，估计这也是为何Google提出Sequence to Sequence模型时发现把输入句子逆序输入做翻译效果会更好的小Trick的原因</span>）。这就是为何说这个模型<strong>没有体现出注意力</strong>的缘由。</p>
+<p>　　引入AM模型，以翻译一个英语句子举例：输入X：Tom chase Jerry。 理想输出：汤姆追逐杰瑞。</p>
+<p>　　应该在翻译“杰瑞”的时候，体现出英文单词对于翻译当前中文单词不同的影响程度，比如给出类似下面一个概率分布值：</p>
+<p style="text-align: center;">（Tom,0.3）（Chase,0.2）（Jerry,0.5）</p>
+<p>　　每个英文单词的概率代表了翻译当前单词“杰瑞”时，注意力分配模型分配给不同英文单词的注意力大小。这对于正确翻译目标语单词肯定是有帮助的，因为引入了新的信息。同理，目标句子中的每个单词都应该学会其对应的源语句子中单词的注意力分配概率信息。这意味着在生成每个单词Yi的时候，<span style="color: #ff0000;"><strong>原先都是相同的中间语义表示C会替换成根据当前生成单词而不断变化的Ci</strong></span>。<span style="background-color: #ffff99;"><strong>理解AM模型的关键就是这里，即由固定的中间语义表示C换成了根据当前输出单词来调整成加入注</strong><strong>意力模型的变化的</strong><strong>Ci</strong>。</span></p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806142115912-1682939089.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图2 引入AM模型的Encoder-Decoder框架</span></p>
+<p>　　即生成目标句子单词的过程成了下面的形式：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806142159178-1634092293.png" alt=""></p>
+<p>　　而<strong>每个Ci可能对应着不同的源语句子单词的注意力分配概率分布</strong>，比如对于上面的英汉翻译来说，其对应的信息可能如下：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806142302309-2112006022.png" alt=""></p>
+<p>　　其中，<strong>f2函数代表Encoder对输入英文单词的某种变换函数</strong>，比如如果Encoder是用的RNN模型的话，这个f2函数的结果往往是某个时刻输入xi后隐层节点的状态值；<strong>g代表Encoder根据单词的中间表示合成整个句子中间语义表示的变换函数</strong>，一般的做法中，<strong>g函数就是对构成元素加权求和</strong>，也就是常常在论文里看到的下列公式：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806142333000-1492896283.png" alt=""></p>
+<p>　　假设Ci中那个i就是上面的“汤姆”，那么<strong>Tx就是3，代表输入句子的长度</strong>，h1=f(“Tom”)，h2=f(“Chase”),h3=f(“Jerry”)，对应的注意力模型权值分别是0.6,0.2,0.2，<strong>所以g函数就是个加权求和函数</strong>。如果形象表示的话，翻译中文单词“汤姆”的时候，数学公式对应的<strong>中间语义表示Ci的形成过程</strong>类似下图：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806142412460-1178080370.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图3 Ci的形成过程</span></p>
+<p>　　这里还有一个问题：生成目标句子某个单词，比如“汤姆”的时候，<strong>你怎么知道AM模型所需要的输入句子单词注意力分配概率分布值呢？</strong>就是说“汤姆”对应的概率分布：</p>
+<h4>　　划重点(注意力权重获取的过程)（Tom,0.3）（Chase,0.2）（Jerry,0.5）是如何得到的呢？</h4>
+<p>　　为了便于说明，我们假设对图1的非AM模型的Encoder-Decoder框架进行细化，Encoder采用RNN模型，Decoder也采用RNN模型，这是比较常见的一种模型配置，则图1的图转换为下图：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806142520665-1351011214.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图4 RNN作为具体模型的Encoder-Decoder框架</span></p>
+<p>　　注意力分配概率分布值的通用计算过程：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806142634471-1534518198.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图5 AM注意力分配概率计算</span></p>
+<p>　　对于采用RNN的Decoder来说，如果要生成 yi 单词，在时刻 i ，我们是可以知道在生成 Yi 之前的隐层节点i时刻的输出值 Hi 的，而我们的目的是要计算生成 Yi 时的输入句子单词“Tom”、“Chase”、“Jerry”对 Yi 来说的注意力分配概率分布，那么可以用i时刻的<strong>隐层节点状态 Hi 去一一和输入句子中每个单词对应的RNN隐层节点状态 hj 进行对比</strong>，即<strong>通过函数 F(hj,Hi) 来获得目标单词 Yi 和每个输入单词对应的对齐可能性</strong>，这个F函数在不同论文里可能会采取不同的方法，然后<strong>函数F的输出经过Softmax进行归一化就得到了符合概率分布取值区间的注意力分配概率分布数值（这就得到了注意力权重）</strong>。图5显示的是当输出单词为“汤姆”时刻对应的输入句子单词的对齐概率。绝大多数AM模型都是<strong>采取上述的计算框架来计算注意力分配概率分布信息</strong>，<strong>区别只是在F的定义上可能有所不同</strong>。</p>
+<p><span style="color: #ff0000;"><strong>　　上述内容就是论文里面常常提到的Soft Attention Model</strong>（任何数据都会给一个权值，没有筛选条件）的基本思想</span>，你能在文献里面看到的大多数AM模型基本就是这个模型，区别很可能只是把这个模型用来解决不同的应用问题。那么<strong>怎么理解AM模型的物理含义呢？</strong>一般文献里会把AM模型看作是<strong>单词对齐模型</strong>，这是非常有道理的。目标句子生成的每个单词对应输入句子单词的概率分布可以理解为输入句子单词和这个目标生成单词的<strong><span style="color: #ff0000;">对齐概率</span></strong>，这在机器翻译语境下是非常直观的：<strong>传统的统计机器翻译一般在做的过程中会专门有一个短语对齐的步骤</strong>，<strong>而注意力模型其实起的是相同的作用</strong>。在其他应用里面把AM模型理解成输入句子和目标句子单词之间的对齐概率也是很顺畅的想法。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806164619665-1207996587.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图6 Google 神经网络机器翻译系统结构图</span></p>
+<p>　　图6所示即为Google于2016年部署到线上的基于神经网络的机器翻译系统，相对传统模型翻译效果有大幅提升，翻译错误率降低了60%，其架构就是上文所述的加上Attention机制的Encoder-Decoder框架，主要区别无非是其Encoder和Decoder使用了8层叠加的LSTM模型。</p>
+<p>当然，从概念上理解的话，<strong>把AM模型理解成影响力模型也是合理的</strong>，就是说生成目标单词的时候，输入句子每个单词对于生成这个单词有多大的影响程度。这种想法也是比较好理解AM模型物理意义的一种思维方式。</p>
+<p>　　图7是论文“<a href="http://www.aclweb.org/anthology/D15-1044">A Neural Attention Model for Sentence Summarization</a>”中，Rush用AM模型来做生成式摘要给出的一个AM的一个非常直观的例子。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806143753246-1275015223.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图7 句子生成式摘要例子</span></p>
+<p>　　这个例子中，Encoder-Decoder框架的输入句子X是：“russian defense minister ivanov called sunday for the creation of a joint front for combating global terrorism”。对应图中纵坐标的句子。系统生成的摘要句子Y是：“russia calls for joint front against terrorism”，对应图中横坐标的句子。可以看出模型已经把句子主体部分正确地抽出来了。<strong>矩阵中每一列代表生成的目标单词对应输入句子每个单词的AM分配概率</strong>，颜色越深代表分配到的概率越大。这个例子对于直观理解AM是很有帮助作用。</p>
+<p>　　《<a href="http://www.aclweb.org/anthology/D15-1044">A Neural Attention Model for Sentence Summarization</a>》论文提供的实验数据集链接(开放可用)：<a href="https://duc.nist.gov/data.html">DUC 2004</a>，感兴趣的朋友可以下载看看。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806143957137-1497662277.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图8 摘要生成 开放数据集</span></p>
+<h1><strong>4. Attention机制的本质思想</strong></h1>
+<p>　　如果把Attention机制从上文讲述例子中的Encoder-Decoder框架中剥离，并进一步做抽象，可以更容易看懂Attention机制的本质思想。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806165033943-1072442256.png" alt="" width="853" height="375"></p>
+<p style="text-align: center;"><span style="color: #999999;">图9 Attention机制的本质思想</span></p>
+<p>　　我们可以这样来看待Attention机制（参考图9）：将Source中的构成元素想象成是由一系列的&lt;Key,Value&gt;数据对构成，此时给定Target中的某个元素Query，通过计算Query和各个Key的相似性或者相关性，得到每个Key对应Value的权重系数，然后对Value进行加权求和，即得到了最终的Attention数值。所以本质上Attention机制是对Source中元素的Value值进行加权求和，而Query和Key用来计算对应Value的权重系数。即可以将其本质思想改写为如下公式：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806165351485-870137528.png" alt=""></p>
+<p style="text-align: left;">　　其中，L<sub>x</sub>=||Source||代表Source的长度，公式含义即如上所述。上文所举的机器翻译的例子里，因为在计算Attention的过程中，Source中的Key和Value合二为一，指向的是同一个东西，也即输入句子中每个单词对应的语义编码，所以可能不容易看出这种能够体现本质思想的结构。</p>
+<p>　　当然，从概念上理解，把Attention仍然理解为从大量信息中有选择地筛选出少量重要信息并聚焦到这些重要信息上，忽略大多不重要的信息，这种思路仍然成立。聚焦的过程体现在权重系数的计算上，权重越大越聚焦于其对应的Value值上，即权重代表了信息的重要性，而Value是其对应的信息。</p>
+<p>　　从图9可以引出另外一种理解，也可以将Attention机制看作一种软寻址（Soft Addressing）:Source可以看作存储器内存储的内容，元素由地址Key和值Value组成，当前有个Key=Query的查询，目的是取出存储器中对应的Value值，即Attention数值。通过Query和存储器内元素Key的地址进行相似性比较来寻址，之所以说是软寻址，指的不像一般寻址只从存储内容里面找出一条内容，而是可能从每个Key地址都会取出内容，取出内容的重要性根据Query和Key的相似性来决定，之后对Value进行加权求和，这样就可以取出最终的Value值，也即Attention值。所以不少研究人员将Attention机制看作软寻址的一种特例，这也是非常有道理的。</p>
+<p>　　至于Attention机制的具体计算过程，如果对目前大多数方法进行抽象的话，可以将其归纳为两个过程：第一个过程是根据Query和Key计算权重系数，第二个过程根据权重系数对Value进行加权求和。而第一个过程又可以细分为两个阶段：第一个阶段根据Query和Key计算两者的相似性或者相关性；第二个阶段对第一阶段的原始分值进行归一化处理；这样，可以将Attention的计算过程抽象为如图10展示的三个阶段。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806191525966-820975705.png" alt="" width="704" height="627"></p>
+<p style="text-align: center;"><span style="color: #888888;">图10 三阶段计算Attention过程</span></p>
+<p>&nbsp;</p>
+<p>　　在第一个阶段，可以引入不同的函数和计算机制，根据Query和某个 Key<sub>i&nbsp;</sub>，计算两者的相似性或者相关性，最常见的方法包括：求两者的向量点积、求两者的向量Cosine相似性或者通过再引入额外的神经网络来求值，即如下方式：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806191654338-264846698.png" alt=""></p>
+<p>　　第一阶段产生的分值根据具体产生的方法不同其数值取值范围也不一样，第二阶段引入类似SoftMax的计算方式对第一阶段的得分进行数值转换，一方面可以进行归一化，将原始计算分值整理成所有元素权重之和为1的概率分布；另一方面也可以通过SoftMax的内在机制更加突出重要元素的权重。即一般采用如下公式计算：</p>
+<p style="text-align: center;">&nbsp;&nbsp;<img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806195333945-948374778.png" alt=""></p>
+<p>　　第二阶段的计算结果 a<sub>i&nbsp;</sub>即为 Value<sub>i&nbsp;</sub>对应的权重系数，然后进行加权求和即可得到Attention数值：</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806195421837-251685236.png" alt=""></p>
+<p>　　通过如上三个阶段的计算，即可求出针对Query的Attention数值，目前绝大多数具体的注意力机制计算方法都符合上述的三阶段抽象计算过程。</p>
+<h1><strong>5. Self Attention模型</strong></h1>
+<p>　　通过上述对Attention本质思想的梳理，我们可以更容易理解本节介绍的Self Attention模型。<strong>Self Attention也经常被称为intra Attention（内部Attention）</strong>，最近一年也获得了比较广泛的使用，比如Google最新的机器翻译模型内部大量采用了Self Attention模型。</p>
+<p>　　在一般任务的Encoder-Decoder框架中，输入Source和输出Target内容是不一样的，比如对于英-中机器翻译来说，Source是英文句子，Target是对应的翻译出的中文句子，Attention机制发生在Target的元素和Source中的所有元素之间。<span style="color: #ff0000;"><strong>而Self Attention顾名思义，指的不是Target和Source之间的Attention机制，而是Source内部元素之间或者Target内部元素之间发生的Attention机制，也可以理解为Target=Source这种特殊情况下的注意力计算机制。</strong></span>其具体计算过程是一样的，只是计算对象发生了变化而已，所以此处不再赘述其计算过程细节。</p>
+<p>　　如果是常规的Target不等于Source情形下的注意力计算，其物理含义正如上文所讲，比如对于机器翻译来说，本质上是目标语单词和源语单词之间的一种单词对齐机制。那么如果是Self Attention机制，一个很自然的问题是：通过Self Attention到底学到了哪些规律或者抽取出了哪些特征呢？或者说引入Self Attention有什么增益或者好处呢？我们仍然以机器翻译中的Self Attention来说明，图11和图12是可视化地表示Self Attention在同一个英语句子内单词间产生的联系。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806200854591-1266493040.png" alt="" width="345" height="667"></p>
+<p style="text-align: center;"><span style="color: #999999;">图11 可视化Self Attention实例</span></p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806200949175-1322518214.png" alt="" width="353" height="539"></p>
+<p style="text-align: center;"><span style="color: #999999;">图12 可视化Self Attention实例</span></p>
+<p>　　从两张图（图11、图12）可以看出，<span style="background-color: #ffff99;"><strong>Self Attention可以捕获同一个句子中单词之间的一些<span style="color: #ff0000;">句法特征</span>（比如图11展示的有一定距离的短语结构）或者<span style="color: #ff0000;">语义特征</span>（比如图12展示的its的指代对象Law）。</strong></span></p>
+<p>　　很明显，<span style="font-size: 18px;"><span style="background-color: #ffff99;"><strong><span style="color: #ff0000;">引入Self Attention后会更容易捕获句子中长距离的相互依赖的特征</span></strong></span>，<span style="background-color: #ffff99; color: #ff0000;"><strong>因为如果是RNN或者LSTM，需要依次序序列计算，对于远距离的相互依赖的特征，要经过若干时间步步骤的信息累积才能将两者联系起来，而距离越远，有效捕获的可能性越小。</strong></span></span></p>
+<p>　　但是Self Attention在计算过程中会直接将句子中任意两个单词的联系通过一个计算步骤直接联系起来，所以<strong>远距离依赖特征之间的距离被极大缩短</strong>，有利于有效地利用这些特征。除此外，<strong>Self Attention对于增加计算的并行性也有直接帮助作用</strong>。这是为何Self Attention逐渐被广泛使用的主要原因。</p>
+<h1><strong>6. Attention机制的应用</strong></h1>
+<p>　　前文有述，Attention机制在深度学习的各种应用领域都有广泛的使用场景。上文在介绍过程中我们主要以自然语言处理中的机器翻译任务作为例子，下面分别再从图像处理领域和语音识别选择典型应用实例来对其应用做简单说明。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806201528694-471360423.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图13 图片-描述任务的Encoder-Decoder框架</span></p>
+<p>　　图片描述（Image-Caption）是一种典型的图文结合的深度学习应用，输入一张图片，人工智能系统输出一句描述句子，语义等价地描述图片所示内容。很明显这种应用场景也可以使用Encoder-Decoder框架来解决任务目标，此时Encoder输入部分是一张图片，一般会用CNN来对图片进行特征抽取，Decoder部分使用RNN或者LSTM来输出自然语言句子（参考图13）。</p>
+<p>　　此时如果加入Attention机制能够明显改善系统输出效果，Attention模型在这里起到了类似人类视觉选择性注意的机制，在输出某个实体单词的时候会将注意力焦点聚焦在图片中相应的区域上。图14给出了根据给定图片生成句子“A person is standing on a beach with a surfboard.”过程时每个单词对应图片中的注意力聚焦区域。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806202339239-1941931195.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图14 图片生成句子中每个单词时的注意力聚焦区域</span></p>
+<p>　　图15给出了另外四个例子形象地展示了这种过程，每个例子上方左侧是输入的原图，下方句子是人工智能系统自动产生的描述语句，上方右侧图展示了当AI系统产生语句中划横线单词的时候，对应图片中聚焦的位置区域。比如当输出单词dog的时候，AI系统会将注意力更多地分配给图片中小狗对应的位置。</p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806202445195-2069204981.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图15 图像描述任务中Attention机制的聚焦作用</span></p>
+<p style="text-align: center;"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/1192699-20180806202531182-629399120.png" alt=""></p>
+<p style="text-align: center;"><span style="color: #999999;">图16 语音识别中音频序列和输出字符之间的Attention</span></p>
+<p>　　语音识别的任务目标是将语音流信号转换成文字，所以也是Encoder-Decoder的典型应用场景。Encoder部分的Source输入是语音流信号，Decoder部分输出语音对应的字符串流。</p>
+<p>　　图16可视化地展示了在Encoder-Decoder框架中加入Attention机制后，当用户用语音说句子 how much would a woodchuck chuck 时，输入部分的声音特征信号和输出字符之间的注意力分配概率分布情况，颜色越深代表分配到的注意力概率越高。从图中可以看出，在这个场景下，Attention机制起到了将输出字符和输入语音信号进行对齐的功能。</p>
+<p>　　上述内容仅仅选取了不同AI领域的几个典型Attention机制应用实例，Encoder-Decoder加Attention架构由于其卓越的实际效果，目前在深度学习领域里得到了广泛的使用，了解并熟练使用这一架构对于解决实际问题会有极大帮助。</p>
+<p>&nbsp;</p>
+<hr>
+<p>&nbsp;</p>
+<p>参考文章：</p>
+<p>【1】<a href="https://blog.csdn.net/malefactor/article/details/50550211">自然语言处理中的Attention Model：是什么及为什么</a></p>
+<p>【2】<a href="https://blog.csdn.net/malefactor/article/details/78767781">深度学习中的注意力机制(2017版)</a></p>
+<p>【3】<a href="https://blog.csdn.net/joshuaxx316/article/details/70665388">Attention注意力机制--原理与应用</a></p>
+<p>【4】<span style="font-size: 15px;"><a href="https://github.com/Choco31415/Attention_Network_With_Keras" data-pjax="#js-repo-pjax-container">Attention_Network_With_Keras</a></span></p>
+<p>【5】<a href="https://blog.csdn.net/john_xyz/article/details/80650677" target="_blank">《A Self-Attention Setentence Embedding》阅读笔记及实践</a></p></div><div id="MySignature" style="display: block;"><div style="background: rgb(255,255,204); padding: 10px 10px 10px 10px; border: 1px dashed rgb(0,0,0); color: #000">
+作者：<a href="http://www.cnblogs.com/guoyaohua" target="_blank" style="font-weight: bold; font-size: 24px; font-family: 华文行楷">郭耀华</a>
+<br>
+出处：<a href="http://www.cnblogs.com/guoyaohua" target="_blank">http://www.guoyaohua.com</a>
+<br>
+微信：guoyaohua167
+<br>
+邮箱：guo.yaohua@foxmail.com
+<br>
+本文版权归作者和博客园所有，欢迎转载，转载请标明出处。
+<br>
+【如果你觉得本文还不错，对你的学习带来了些许帮助，请帮忙点击右下角的推荐】
+</div>
+<br>
+<img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/o_o_dashang2.png" alt="dashang" width="100%" height="100%"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="https://www.cnblogs.com/guoyaohua/category/1149347.html" target="_blank">机器学习</a>,<a href="https://www.cnblogs.com/guoyaohua/category/1143570.html" target="_blank">深度学习</a></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(9429924,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;cf18a853-d7b1-479e-0270-08d49c352df3&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/guoyaohua/" target="_blank"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/20180202230001.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/guoyaohua/">郭耀华</a><br>
+            <a href="http://home.cnblogs.com/u/guoyaohua/followees">关注 - 2</a><br>
+            <a href="http://home.cnblogs.com/u/guoyaohua/followers">粉丝 - 146</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;cf18a853-d7b1-479e-0270-08d49c352df3&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg"><div style="padding-bottom: 5px"><span class="icon_favorite" style="padding-top: 2px"></span><a onclick="cnblogs.UserManager.FollowBlogger(&#39;cf18a853-d7b1-479e-0270-08d49c352df3&#39;);" href="javascript:void(0);" style="font-weight: bold; padding-left:5px;">关注我</a> </div>
+    <div class="diggit" onclick="votePost(9429924,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">3</span>
+    </div>
+    <div class="buryit" onclick="votePost(9429924,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="https://www.cnblogs.com/guoyaohua/p/9265268.html" class="p_n_p_prefix">« </a> 上一篇：<a href="https://www.cnblogs.com/guoyaohua/p/9265268.html" title="发布于2018-07-05 11:44">Win10 Anaconda下TensorFlow-GPU环境搭建详细教程（包含CUDA+cuDNN安装过程）</a><br><a href="https://www.cnblogs.com/guoyaohua/p/9436237.html" class="p_n_p_prefix">» </a> 下一篇：<a href="https://www.cnblogs.com/guoyaohua/p/9436237.html" title="发布于2018-08-07 12:23">SVM（支持向量机）之Hinge Loss解释</a><br></div>
+</div>
+
+
+		</div>
+		<div class="postDesc">posted @ <span id="post-date">2018-08-06 21:55</span> <a href="https://www.cnblogs.com/guoyaohua/">郭耀华</a> 阅读(<span id="post_view_count">2280</span>) 评论(<span id="post_comment_count">2</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=9429924" rel="nofollow">编辑</a> <a href="https://www.cnblogs.com/guoyaohua/p/9429924.html#" onclick="AddToWz(9429924);return false;">收藏</a></div>
+	</div>
+	<script type="text/javascript">var allowComments=true,cb_blogId=370717,cb_entryId=9429924,cb_blogApp=currentBlogApp,cb_blogUserGuid='cf18a853-d7b1-479e-0270-08d49c352df3',cb_entryCreatedDate='2018/8/6 21:55:00';loadViewCount(cb_entryId);var cb_postType=1;var isMarkdown=false;</script>
+	
+</div><!--end: topics 文章、评论容器-->
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<br>
+<div class="feedback_area_title">评论列表</div>
+<div class="feedbackNoItems"></div>	
+
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="https://www.cnblogs.com/guoyaohua/p/9429924.html#4036650" class="layer">#1楼</a><a name="4036650" id="comment_anchor_4036650"></a>  <span class="comment_date">2018-08-07 08:38</span> <a id="a_comment_author_4036650" href="https://www.cnblogs.com/xing901022/" target="_blank">xingoo</a> <a href="http://msg.cnblogs.com/send/xingoo" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_4036650" class="blog_comment_body">先mark，后看！</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4036650,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(4036650,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_4036650_avatar" style="display:none;">http://pic.cnblogs.com/face/449064/20170818090804.png</span>
+			</div>
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+				<div class="feedbackManage">
+					&nbsp;&nbsp;<span class="comment_actions"></span>
+				</div>
+				<a href="https://www.cnblogs.com/guoyaohua/p/9429924.html#4115231" class="layer">#2楼</a><a name="4115231" id="comment_anchor_4115231"></a><span id="comment-maxId" style="display:none;">4115231</span><span id="comment-maxDate" style="display:none;">2018/11/15 16:38:05</span>  <span class="comment_date">2018-11-15 16:38</span> <a id="a_comment_author_4115231" href="http://home.cnblogs.com/u/1439743/" target="_blank">SunStriKE</a> <a href="http://msg.cnblogs.com/send/SunStriKE" title="发送站内短消息" class="sendMsg2This">&nbsp;</a>
+			</div>
+			<div class="feedbackCon">
+				<div id="comment_body_4115231" class="blog_comment_body">清晰易懂，博主nb</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4115231,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(4115231,&#39;Bury&#39;,this)">反对(0)</a></div>
+			</div>
+		</div>
+	<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/guoyaohua/p/9429924.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/guoyaohua/p/9429924.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-工控&#39;)">【推荐】超50万C++/C#源码: 大型实时仿真HMI组态CAD\GIS图形源码！</a><br><a href="https://gitee.com/enterprises?from=bky-2" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-gitee&#39;)">【推荐】专业便捷的企业级代码托管服务 - Gitee 码云</a><br></div>
+<div id="opt_under_post"></div>
+<script async="async" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/gpt.js.下载"></script>
+<script>
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+</script>
+<script>
+  googletag.cmd.push(function() {
+        googletag.defineSlot('/1090369/C1', [300, 250], 'div-gpt-ad-1546353474406-0').addService(googletag.pubads());
+        googletag.defineSlot('/1090369/C2', [468, 60], 'div-gpt-ad-1539008685004-0').addService(googletag.pubads());
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+  });
+</script>
+<div id="cnblogs_c1" class="c_ad_block" style="">
+    <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;" data-google-query-id="COfw0ZS32-ACFZccKgodb-UMrw"><div id="google_ads_iframe_/1090369/C1_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C1_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C1_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="1" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/saved_resource.html"></iframe></div></div>
+</div>
+<div id="under_post_news"></div>
+<div id="cnblogs_c2" class="c_ad_block" style="">
+    <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;" data-google-query-id="COjw0ZS32-ACFZccKgodb-UMrw"><div id="google_ads_iframe_/1090369/C2_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/1090369/C2_0" title="3rd party ad content" name="google_ads_iframe_/1090369/C2_0" width="468" height="60" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="2" style="border: 0px; vertical-align: bottom;" data-load-complete="true" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/saved_resource(1).html"></iframe></div></div>
+</div>
+<div id="under_post_kb"></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+ if(enablePostBottom()) {
+    codeHighlight();
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverT2();
+    deliverC1();
+    deliverC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);  
+}
+</script>
+</div>
+
+    
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+
+	<div id="sideBar">
+		<div id="sideBarMain">
+			
+<!--done-->
+<div class="newsItem">
+<h3 class="catListTitle">公告</h3>
+	<div id="blog-news"><img src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/o_face_icon.jpg" alt="郭耀华" class="img_avatar" width="290px" style="border-radius:50%">
+
+
+<!-- 注释
+<div align="center">您是第：<img border="0" src="https://cc.amazingcounters.com/counter.php?i=3221262&c=9664099" alt="PV" title="总访问量">  位访客</div>
+
+<embed frameborder="no" border="0" marginwidth="0" marginheight="0" width=100%height=450 src="//music.163.com/outchain/player?type=0&id=2166355350&auto=0&height=430"></embed>
+
+--><div id="profile_block">昵称：<a href="https://home.cnblogs.com/u/guoyaohua/">郭耀华</a><br>园龄：<a href="https://home.cnblogs.com/u/guoyaohua/" title="入园时间：2017-07-03">1年7个月</a><br>粉丝：<a href="https://home.cnblogs.com/u/guoyaohua/followers/">146</a><br>关注：<a href="https://home.cnblogs.com/u/guoyaohua/followees/">2</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;cf18a853-d7b1-479e-0270-08d49c352df3&#39;)">+加关注</a></div><script>getFollowStatus('cf18a853-d7b1-479e-0270-08d49c352df3')</script></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2019/01/01&#39;);return false;">&lt;</a></td><td align="center">2019年2月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2019/03/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">27</td><td class="CalOtherMonthDay" align="center">28</td><td class="CalOtherMonthDay" align="center">29</td><td class="CalOtherMonthDay" align="center">30</td><td class="CalOtherMonthDay" align="center">31</td><td align="center">1</td><td class="CalWeekendDay" align="center">2</td></tr><tr><td class="CalWeekendDay" align="center">3</td><td align="center">4</td><td align="center">5</td><td align="center">6</td><td align="center">7</td><td align="center">8</td><td class="CalWeekendDay" align="center">9</td></tr><tr><td class="CalWeekendDay" align="center">10</td><td align="center">11</td><td align="center">12</td><td align="center">13</td><td align="center">14</td><td align="center">15</td><td class="CalWeekendDay" align="center">16</td></tr><tr><td class="CalWeekendDay" align="center">17</td><td align="center">18</td><td align="center">19</td><td align="center">20</td><td align="center">21</td><td align="center">22</td><td class="CalWeekendDay" align="center">23</td></tr><tr><td class="CalWeekendDay" align="center">24</td><td align="center">25</td><td align="center">26</td><td class="CalTodayDay" align="center">27</td><td align="center">28</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td></tr><tr><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td><td class="CalOtherMonthDay" align="center">6</td><td class="CalOtherMonthDay" align="center">7</td><td class="CalOtherMonthDay" align="center">8</td><td class="CalOtherMonthDay" align="center">9</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<div class="catListLink">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="https://www.cnblogs.com/guoyaohua/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="https://www.cnblogs.com/guoyaohua/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="https://www.cnblogs.com/guoyaohua/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="https://www.cnblogs.com/guoyaohua/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="https://www.cnblogs.com/guoyaohua/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+<ul>
+
+</ul>
+</div>
+</div></div><div id="sidebar_recentposts" class="sidebar-block">
+<div class="catListEssay">
+<h3 class="catListTitle">最新随笔</h3>
+<ul>
+<li><a href="https://www.cnblogs.com/guoyaohua/p/transformer.html">1. 一文看懂Transformer内部原理（含PyTorch实现）</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/bert.html">2. 【中文版 | 论文原文】BERT：语言理解的深度双向变换器预训练</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9905760.html">3. 机器学习数学基础总结</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9901614.html">4. 平均精度均值(mAP)——目标检测模型性能统计量</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9692647.html">5. 【Java面试宝典】深入理解JAVA虚拟机</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9488119.html">6. Faster R-CNN：详解目标检测的实现过程</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9476235.html">7. TensorFlow 使用变量共享</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9443612.html">8. 各种卷积结构原理及优劣总结</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9436237.html">9. SVM（支持向量机）之Hinge Loss解释</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9429924.html">10. 【NLP】Attention Model（注意力模型）学习总结</a></li>
+</ul>
+</div>
+</div><div id="sidebar_categories">
+<div id="sidebar_postcategory" class="catListPostCategory sidebar-block">
+<h3 class="catListTitle">随笔分类<span style="font-size:11px;font-weight:normal">(109)</span></h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_0_Link_0" href="https://www.cnblogs.com/guoyaohua/category/1170940.html">10JQKA</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_1" href="https://www.cnblogs.com/guoyaohua/category/1149346.html">Android(3)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_2" href="https://www.cnblogs.com/guoyaohua/category/1170939.html">Android开发笔记(1)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_3" href="https://www.cnblogs.com/guoyaohua/category/1149345.html">JAVA(25)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_4" href="https://www.cnblogs.com/guoyaohua/category/1137125.html">LeetCode每日打卡(7)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_5" href="https://www.cnblogs.com/guoyaohua/category/1130302.html">python(2)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_6" href="https://www.cnblogs.com/guoyaohua/category/1149347.html">机器学习(14)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_7" href="https://www.cnblogs.com/guoyaohua/category/1149306.html">剑指offer刷题(16)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_8" href="https://www.cnblogs.com/guoyaohua/category/1143570.html">深度学习(35)</a> </li>
+
+<li><a id="CatList_LinkList_0_Link_9" href="https://www.cnblogs.com/guoyaohua/category/1170383.html">项目作品(6)</a> </li>
+
+</ul>
+
+</div>
+
+<div id="sidebar_postarchive" class="catListPostArchive sidebar-block">
+<h3 class="catListTitle">随笔档案<span style="font-size:11px;font-weight:normal">(154)</span></h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_1_Link_0" href="https://www.cnblogs.com/guoyaohua/archive/2018/12.html">2018年12月 (2)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_1" href="https://www.cnblogs.com/guoyaohua/archive/2018/11.html">2018年11月 (2)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_2" href="https://www.cnblogs.com/guoyaohua/archive/2018/09.html">2018年9月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_3" href="https://www.cnblogs.com/guoyaohua/archive/2018/08.html">2018年8月 (5)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_4" href="https://www.cnblogs.com/guoyaohua/archive/2018/07.html">2018年7月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_5" href="https://www.cnblogs.com/guoyaohua/archive/2018/06.html">2018年6月 (5)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_6" href="https://www.cnblogs.com/guoyaohua/archive/2018/05.html">2018年5月 (3)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_7" href="https://www.cnblogs.com/guoyaohua/archive/2018/04.html">2018年4月 (8)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_8" href="https://www.cnblogs.com/guoyaohua/archive/2018/03.html">2018年3月 (32)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_9" href="https://www.cnblogs.com/guoyaohua/archive/2018/02.html">2018年2月 (15)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_10" href="https://www.cnblogs.com/guoyaohua/archive/2018/01.html">2018年1月 (21)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_11" href="https://www.cnblogs.com/guoyaohua/archive/2017/12.html">2017年12月 (7)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_12" href="https://www.cnblogs.com/guoyaohua/archive/2017/10.html">2017年10月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_13" href="https://www.cnblogs.com/guoyaohua/archive/2017/09.html">2017年9月 (3)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_14" href="https://www.cnblogs.com/guoyaohua/archive/2017/08.html">2017年8月 (2)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_15" href="https://www.cnblogs.com/guoyaohua/archive/2017/07.html">2017年7月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_16" href="https://www.cnblogs.com/guoyaohua/archive/2014/07.html">2014年7月 (2)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_17" href="https://www.cnblogs.com/guoyaohua/archive/2014/04.html">2014年4月 (1)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_18" href="https://www.cnblogs.com/guoyaohua/archive/2014/03.html">2014年3月 (7)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_19" href="https://www.cnblogs.com/guoyaohua/archive/2014/02.html">2014年2月 (3)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_20" href="https://www.cnblogs.com/guoyaohua/archive/2013/11.html">2013年11月 (3)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_21" href="https://www.cnblogs.com/guoyaohua/archive/2013/10.html">2013年10月 (21)</a> </li>
+
+<li><a id="CatList_LinkList_1_Link_22" href="https://www.cnblogs.com/guoyaohua/archive/2013/09.html">2013年9月 (8)</a> </li>
+
+</ul>
+
+</div>
+
+<div id="sidebar_imagecategory" class="catListImageCategory sidebar-block">
+<h3 class="catListTitle">相册<span style="font-size:11px;font-weight:normal">(6)</span></h3>
+
+<ul>
+
+<li><a id="CatList_LinkList_2_Link_0" href="https://www.cnblogs.com/guoyaohua/gallery/1171202.html" rel="nofollow">打赏码(6)</a> </li>
+
+</ul>
+
+</div>
+
+</div><div id="sidebar_scorerank" class="sidebar-block">
+<div class="catListBlogRank">
+<h3 class="catListTitle">积分与排名</h3>
+<ul>
+	<li class="liScore">
+		积分 -	76788
+	</li>
+	<li class="liRank">
+		排名 -	6171
+	</li>
+</ul>
+</div>
+
+
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<div class="catListComment">
+<h3 class="catListTitle">最新评论</h3>
+
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/guoyaohua/p/8542554.html#4189569">1. Re:深度学习——优化器算法Optimizer详解（BGD、SGD、MBGD、Momentum、NAG、Adagrad、Adadelta、RMSprop、Adam）</a></li>
+        <li class="recent_comment_body">momentum中进行参数更新时，cost function关于参数的梯度前除了要乘以学习率，还要乘以（1-γ）把</li>
+        <li class="recent_comment_author">--xhj_enen</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/guoyaohua/p/8542554.html#4174279">2. Re:深度学习——优化器算法Optimizer详解（BGD、SGD、MBGD、Momentum、NAG、Adagrad、Adadelta、RMSprop、Adam）</a></li>
+        <li class="recent_comment_body">总结的很好，学习了</li>
+        <li class="recent_comment_author">--奋斗的矿工</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/guoyaohua/p/9901614.html#4166729">3. Re:平均精度均值(mAP)——目标检测模型性能统计量</a></li>
+        <li class="recent_comment_body">@剑翎可以参考 Luminoth 实现：...</li>
+        <li class="recent_comment_author">--郭耀华</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/guoyaohua/p/9901614.html#4165433">4. Re:平均精度均值(mAP)——目标检测模型性能统计量</a></li>
+        <li class="recent_comment_body">有完整的代码吗</li>
+        <li class="recent_comment_author">--剑翎</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/guoyaohua/p/8497020.html#4139399">5. Re:易客——无线点餐系统</a></li>
+        <li class="recent_comment_body">@smallluck博文中有github地址。...</li>
+        <li class="recent_comment_author">--郭耀华</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">阅读排行榜</h3>
+	<div id="TopViewPostsBlock"><ul><li><a href="https://www.cnblogs.com/guoyaohua/p/8724433.html">1. 【深度学习】深入理解Batch Normalization批标准化(44632)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8600214.html">2. 十大经典排序算法最强总结（含JAVA代码实现）(14691)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8542554.html">3. 深度学习——优化器算法Optimizer详解（BGD、SGD、MBGD、Momentum、NAG、Adagrad、Adadelta、RMSprop、Adam）(14553)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8994246.html">4. 【深度学习】目标检测算法总结（R-CNN、Fast R-CNN、Faster R-CNN、FPN、YOLO、SSD、RetinaNet）(10006)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8534077.html">5. 深度学习——卷积神经网络 的经典网络（LeNet-5、AlexNet、ZFNet、VGG-16、GoogLeNet、ResNet）(7936)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9217206.html">6. 【深度学习】一文读懂机器学习常用损失函数（Loss Function）(7762)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9265268.html">7. Win10 Anaconda下TensorFlow-GPU环境搭建详细教程（包含CUDA+cuDNN安装过程）(7261)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8855636.html">8. 【深度学习】数据降维方法总结(6160)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8940871.html">9. SCNN车道线检测--(SCNN)Spatial As Deep: Spatial CNN for Traffic Scene Understanding（论文解读）(4230)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9240336.html">10. NLP之——Word2Vec详解(3234)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<div class="catListFeedback">
+<h3 class="catListTitle">评论排行榜</h3>
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="https://www.cnblogs.com/guoyaohua/p/8600214.html">1. 十大经典排序算法最强总结（含JAVA代码实现）(18)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8724433.html">2. 【深度学习】深入理解Batch Normalization批标准化(10)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8502775.html">3. SmileyFace——基于OpenCV的人脸人眼检测、面部识别程序(3)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8497020.html">4. 易客——无线点餐系统(2)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8994246.html">5. 【深度学习】目标检测算法总结（R-CNN、Fast R-CNN、Faster R-CNN、FPN、YOLO、SSD、RetinaNet）(2)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8542554.html">6. 深度学习——优化器算法Optimizer详解（BGD、SGD、MBGD、Momentum、NAG、Adagrad、Adadelta、RMSprop、Adam）(2)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8955372.html">7. 《剑指offer》全部题目-含Java实现(2)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9901614.html">8. 平均精度均值(mAP)——目标检测模型性能统计量(2)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9429924.html">9. 【NLP】Attention Model（注意力模型）学习总结(2)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9059522.html">10. Python 中的 if __name__ == '__main__' 该如何理解(1)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<div class="catListView">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div id="TopDiggPostsBlock"><ul><li><a href="https://www.cnblogs.com/guoyaohua/p/8600214.html">1. 十大经典排序算法最强总结（含JAVA代码实现）(114)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8724433.html">2. 【深度学习】深入理解Batch Normalization批标准化(65)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8994246.html">3. 【深度学习】目标检测算法总结（R-CNN、Fast R-CNN、Faster R-CNN、FPN、YOLO、SSD、RetinaNet）(22)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8542554.html">4. 深度学习——优化器算法Optimizer详解（BGD、SGD、MBGD、Momentum、NAG、Adagrad、Adadelta、RMSprop、Adam）(16)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8534077.html">5. 深度学习——卷积神经网络 的经典网络（LeNet-5、AlexNet、ZFNet、VGG-16、GoogLeNet、ResNet）(15)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8955372.html">6. 《剑指offer》全部题目-含Java实现(10)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8502775.html">7. SmileyFace——基于OpenCV的人脸人眼检测、面部识别程序(6)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/8940871.html">8. SCNN车道线检测--(SCNN)Spatial As Deep: Spatial CNN for Traffic Scene Understanding（论文解读）(6)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9217206.html">9. 【深度学习】一文读懂机器学习常用损失函数（Loss Function）(6)</a></li><li><a href="https://www.cnblogs.com/guoyaohua/p/9905760.html">10. 机器学习数学基础总结(5)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script>
+			</div>
+			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		
+<!--done-->
+Copyright ©2019 郭耀华
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+<!--PageEndHtml Block Begin-->
+<script type="text/javascript" language="javascript"> 
+//为右下角推荐推荐区域添加关注按钮
+window.onload = function () {
+    $('#div_digg').prepend('<div style="padding-bottom: 5px"><span class="icon_favorite" style="padding-top: 2px"></span><a onclick="cnblogs.UserManager.FollowBlogger(\'cf18a853-d7b1-479e-0270-08d49c352df3\');" href="javascript:void(0);" style="font-weight: bold; padding-left:5px;">关注我</a> </div>');
+}
+</script>
+<script type="text/javascript" language="javascript">
+　　//Setting ico for cnblogs
+　　var linkObject = document.createElement('link');
+　　linkObject.rel = "shortcut icon";
+　　linkObject.href = "https://files.cnblogs.com/files/guoyaohua/favicon.ico";
+　　document.getElementsByTagName("head")[0].appendChild(linkObject);
+</script>
+
+
+<script type="text/javascript">
+var enableGoogleAd = false;
+</script>
+<!--PageEndHtml Block End-->
+
+
+<iframe id="google_osd_static_frame_9833401198682" name="google_osd_static_frame" style="display: none; width: 0px; height: 0px;" src="./【NLP】Attention Model（注意力模型）学习总结 - 郭耀华 - 博客园_files/saved_resource(2).html"></iframe><div id="rememberry__extension__root" style="all: unset;"></div></body></html>

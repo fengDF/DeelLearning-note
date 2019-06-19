@@ -1,0 +1,9 @@
+dropout:
+
+L2正则：loss=交叉熵+描绘网络复杂度的系数（惩罚因子）
+***  tf.nn.l2_loss      tf.contrib.layers.l2_regularizer 区别使用-->https://blog.csdn.net/holmes_MX/article/details/82317742
+#tf.contrib.layers.l2_regularize:   https://blog.csdn.net/gsww404/article/details/80414675
+
+
+https://blog.csdn.net/vcvycy/article/details/78597350
+ https://blog.csdn.net/sinat_29957455/article/details/78397601

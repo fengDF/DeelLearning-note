@@ -1,0 +1,19 @@
+【全连接+softmax】
+https://blog.csdn.net/blogshinelee/article/details/84826837===》其中模板匹配的角度理解！！！
+
+【全连接】
+https://blog.csdn.net/m0_37407756/article/details/80904580
+作用：就是把以前的局部特征重新通过权值矩阵组装成完整的图。因为用到了所有的局部特征，所以叫全连接
+	全连接之前都是在提取特征，全连接层的作用主要就是实现分类（Classification）
+
+【计算Logit】：目标：batch*[maxlen,num classs]	bilstm 所以是2*hidden
+
+--(1)--->reshape+模板匹配:Wx+b: --》x[batch*maxlen,2*hidden]*w加权矩阵[2*hidden,hidden]=[batch*maxlen,hidden size]  
+：理解：矩阵[batch*batch,2*hidde]:batch*maxlen总数中 --》  每一个Token 的隐状态的表示 [1，2*hidden] *权重矩阵[2*hid,hid]每个列（2*hid,1）做加权：2*hid个待加权元素，---》一共乘hid列--》每个token加权后表示：【1*hid】
+-(2)-->加一层激活函数：提高非线性表达能力
+
+
+-(3)-》计算logit: 每个Token 在每个类别的分数   Wx+b  :  [batch*maxlen,hidden size] *w特征模板:[hid,numclass] =  [batch*maxlen ,num-class]: 相当于给batch*maxlen个位置做 hidden*hidden 模板匹配/加权  得到batch*maxlen个 Token 都打了num个分数
+reshape: batch*[maxlen,num classs]
+
+

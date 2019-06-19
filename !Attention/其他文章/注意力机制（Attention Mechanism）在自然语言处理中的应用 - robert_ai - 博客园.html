@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<!-- saved from url=(0050)https://www.cnblogs.com/robert-dlut/p/5952032.html -->
+<html lang="zh-cn"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="origin">
+    <title>注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园</title>
+<meta property="og:description" content="注意力机制（Attention Mechanism）在自然语言处理中的应用 近年来，深度学习的研究越来越深入，在各个领域也都获得了不少突破性的进展。基于注意力（attention）机制的神经网络成为了">
+    <link type="text/css" rel="stylesheet" href="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/blog-common.css">
+<link id="MainCss" type="text/css" rel="stylesheet" href="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/bundle-sea.css">
+<link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/bundle-sea-mobile.css">
+    <link title="RSS" type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/robert-dlut/rss">
+    <link title="RSD" type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/robert-dlut/rsd.xml">
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/robert-dlut/wlwmanifest.xml">
+    <script async="" src="https://www.google-analytics.com/analytics.js"></script><script src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/jquery-2.2.0.min.js.下载"></script>
+    <script>var currentBlogId=197272;var currentBlogApp='robert-dlut',cb_enable_mathjax=true;var isLogined=false;</script>
+    <script type="text/x-mathjax-config;executed=true">
+    MathJax.Hub.Config({
+        tex2jax: { inlineMath: [['$','$'], ['\\(','\\)']], processClass: 'math', processEscapes: true },
+        TeX: { 
+            equationNumbers: { autoNumber: ['AMS'], useLabelIds: true }, 
+            extensions: ['extpfeil.js'],
+            Macros: {bm: "\\boldsymbol"}
+        },
+        'HTML-CSS': { linebreaks: { automatic: true } },
+        SVG: { linebreaks: { automatic: true } }
+        });
+    </script><script src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/MathJax.js.下载"></script>
+<script src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/blog-common.js.下载" type="text/javascript"></script>
+<style type="text/css">.MathJax_Hover_Frame {border-radius: .25em; -webkit-border-radius: .25em; -moz-border-radius: .25em; -khtml-border-radius: .25em; box-shadow: 0px 0px 15px #83A; -webkit-box-shadow: 0px 0px 15px #83A; -moz-box-shadow: 0px 0px 15px #83A; -khtml-box-shadow: 0px 0px 15px #83A; border: 1px solid #A6D ! important; display: inline-block; position: absolute}
+.MathJax_Menu_Button .MathJax_Hover_Arrow {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 4px; -webkit-border-radius: 4px; -moz-border-radius: 4px; -khtml-border-radius: 4px; font-family: 'Courier New',Courier; font-size: 9px; color: #F0F0F0}
+.MathJax_Menu_Button .MathJax_Hover_Arrow span {display: block; background-color: #AAA; border: 1px solid; border-radius: 3px; line-height: 0; padding: 4px}
+.MathJax_Hover_Arrow:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_Hover_Arrow:hover span {background-color: #CCC!important}
+</style><style type="text/css">#MathJax_About {position: fixed; left: 50%; width: auto; text-align: center; border: 3px outset; padding: 1em 2em; background-color: #DDDDDD; color: black; cursor: default; font-family: message-box; font-size: 120%; font-style: normal; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; border-radius: 15px; -webkit-border-radius: 15px; -moz-border-radius: 15px; -khtml-border-radius: 15px; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_About.MathJax_MousePost {outline: none}
+.MathJax_Menu {position: absolute; background-color: white; color: black; width: auto; padding: 2px; border: 1px solid #CCCCCC; margin: 0; cursor: default; font: menu; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; z-index: 201; box-shadow: 0px 10px 20px #808080; -webkit-box-shadow: 0px 10px 20px #808080; -moz-box-shadow: 0px 10px 20px #808080; -khtml-box-shadow: 0px 10px 20px #808080; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+.MathJax_MenuItem {padding: 2px 2em; background: transparent}
+.MathJax_MenuArrow {position: absolute; right: .5em; padding-top: .25em; color: #666666; font-size: .75em}
+.MathJax_MenuActive .MathJax_MenuArrow {color: white}
+.MathJax_MenuArrow.RTL {left: .5em; right: auto}
+.MathJax_MenuCheck {position: absolute; left: .7em}
+.MathJax_MenuCheck.RTL {right: .7em; left: auto}
+.MathJax_MenuRadioCheck {position: absolute; left: 1em}
+.MathJax_MenuRadioCheck.RTL {right: 1em; left: auto}
+.MathJax_MenuLabel {padding: 2px 2em 4px 1.33em; font-style: italic}
+.MathJax_MenuRule {border-top: 1px solid #CCCCCC; margin: 4px 1px 0px}
+.MathJax_MenuDisabled {color: GrayText}
+.MathJax_MenuActive {background-color: Highlight; color: HighlightText}
+.MathJax_MenuDisabled:focus, .MathJax_MenuLabel:focus {background-color: #E8E8E8}
+.MathJax_ContextMenu:focus {outline: none}
+.MathJax_ContextMenu .MathJax_MenuItem:focus {outline: none}
+#MathJax_AboutClose {top: .2em; right: .2em}
+.MathJax_Menu .MathJax_MenuClose {top: -10px; left: -10px}
+.MathJax_MenuClose {position: absolute; cursor: pointer; display: inline-block; border: 2px solid #AAA; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; font-family: 'Courier New',Courier; font-size: 24px; color: #F0F0F0}
+.MathJax_MenuClose span {display: block; background-color: #AAA; border: 1.5px solid; border-radius: 18px; -webkit-border-radius: 18px; -moz-border-radius: 18px; -khtml-border-radius: 18px; line-height: 0; padding: 8px 0 6px}
+.MathJax_MenuClose:hover {color: white!important; border: 2px solid #CCC!important}
+.MathJax_MenuClose:hover span {background-color: #CCC!important}
+.MathJax_MenuClose:hover:focus {outline: none}
+</style><style type="text/css">.MathJax_Preview .MJXf-math {color: inherit!important}
+</style><style type="text/css">.MJX_Assistive_MathML {position: absolute!important; top: 0; left: 0; clip: rect(1px, 1px, 1px, 1px); padding: 1px 0 0 0!important; border: 0!important; height: 1px!important; width: 1px!important; overflow: hidden!important; display: block!important; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none}
+.MJX_Assistive_MathML.MJX_Assistive_MathML_Block {width: 100%!important}
+</style><style type="text/css">#MathJax_Zoom {position: absolute; background-color: #F0F0F0; overflow: auto; display: block; z-index: 301; padding: .5em; border: 1px solid black; margin: 0; font-weight: normal; font-style: normal; text-align: left; text-indent: 0; text-transform: none; line-height: normal; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; box-shadow: 5px 5px 15px #AAAAAA; -webkit-box-shadow: 5px 5px 15px #AAAAAA; -moz-box-shadow: 5px 5px 15px #AAAAAA; -khtml-box-shadow: 5px 5px 15px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')}
+#MathJax_ZoomOverlay {position: absolute; left: 0; top: 0; z-index: 300; display: inline-block; width: 100%; height: 100%; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+#MathJax_ZoomFrame {position: relative; display: inline-block; height: 0; width: 0}
+#MathJax_ZoomEventTrap {position: absolute; left: 0; top: 0; z-index: 302; display: inline-block; border: 0; padding: 0; margin: 0; background-color: white; opacity: 0; filter: alpha(opacity=0)}
+</style><style type="text/css">.MathJax_Preview {color: #888}
+#MathJax_Message {position: fixed; left: 1em; bottom: 1.5em; background-color: #E6E6E6; border: 1px solid #959595; margin: 0px; padding: 2px 8px; z-index: 102; color: black; font-size: 80%; width: auto; white-space: nowrap}
+#MathJax_MSIE_Frame {position: absolute; top: 0; left: 0; width: 0px; z-index: 101; border: 0px; margin: 0px; padding: 0px}
+.MathJax_Error {color: #CC0000; font-style: italic}
+</style><style type="text/css">.MJXp-script {font-size: .8em}
+.MJXp-right {-webkit-transform-origin: right; -moz-transform-origin: right; -ms-transform-origin: right; -o-transform-origin: right; transform-origin: right}
+.MJXp-bold {font-weight: bold}
+.MJXp-italic {font-style: italic}
+.MJXp-scr {font-family: MathJax_Script,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-frak {font-family: MathJax_Fraktur,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-sf {font-family: MathJax_SansSerif,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-cal {font-family: MathJax_Caligraphic,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-mono {font-family: MathJax_Typewriter,'Times New Roman',Times,STIXGeneral,serif}
+.MJXp-largeop {font-size: 150%}
+.MJXp-largeop.MJXp-int {vertical-align: -.2em}
+.MJXp-math {display: inline-block; line-height: 1.2; text-indent: 0; font-family: 'Times New Roman',Times,STIXGeneral,serif; white-space: nowrap; border-collapse: collapse}
+.MJXp-display {display: block; text-align: center; margin: 1em 0}
+.MJXp-math span {display: inline-block}
+.MJXp-box {display: block!important; text-align: center}
+.MJXp-box:after {content: " "}
+.MJXp-rule {display: block!important; margin-top: .1em}
+.MJXp-char {display: block!important}
+.MJXp-mo {margin: 0 .15em}
+.MJXp-mfrac {margin: 0 .125em; vertical-align: .25em}
+.MJXp-denom {display: inline-table!important; width: 100%}
+.MJXp-denom > * {display: table-row!important}
+.MJXp-surd {vertical-align: top}
+.MJXp-surd > * {display: block!important}
+.MJXp-script-box > *  {display: table!important; height: 50%}
+.MJXp-script-box > * > * {display: table-cell!important; vertical-align: top}
+.MJXp-script-box > *:last-child > * {vertical-align: bottom}
+.MJXp-script-box > * > * > * {display: block!important}
+.MJXp-mphantom {visibility: hidden}
+.MJXp-munderover {display: inline-table!important}
+.MJXp-over {display: inline-block!important; text-align: center}
+.MJXp-over > * {display: block!important}
+.MJXp-munderover > * {display: table-row!important}
+.MJXp-mtable {vertical-align: .25em; margin: 0 .125em}
+.MJXp-mtable > * {display: inline-table!important; vertical-align: middle}
+.MJXp-mtr {display: table-row!important}
+.MJXp-mtd {display: table-cell!important; text-align: center; padding: .5em 0 0 .5em}
+.MJXp-mtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-mlabeledtr {display: table-row!important}
+.MJXp-mlabeledtr > .MJXp-mtd:first-child {padding-left: 0}
+.MJXp-mlabeledtr:first-child > .MJXp-mtd {padding-top: 0}
+.MJXp-merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%}
+.MJXp-scale0 {-webkit-transform: scaleX(.0); -moz-transform: scaleX(.0); -ms-transform: scaleX(.0); -o-transform: scaleX(.0); transform: scaleX(.0)}
+.MJXp-scale1 {-webkit-transform: scaleX(.1); -moz-transform: scaleX(.1); -ms-transform: scaleX(.1); -o-transform: scaleX(.1); transform: scaleX(.1)}
+.MJXp-scale2 {-webkit-transform: scaleX(.2); -moz-transform: scaleX(.2); -ms-transform: scaleX(.2); -o-transform: scaleX(.2); transform: scaleX(.2)}
+.MJXp-scale3 {-webkit-transform: scaleX(.3); -moz-transform: scaleX(.3); -ms-transform: scaleX(.3); -o-transform: scaleX(.3); transform: scaleX(.3)}
+.MJXp-scale4 {-webkit-transform: scaleX(.4); -moz-transform: scaleX(.4); -ms-transform: scaleX(.4); -o-transform: scaleX(.4); transform: scaleX(.4)}
+.MJXp-scale5 {-webkit-transform: scaleX(.5); -moz-transform: scaleX(.5); -ms-transform: scaleX(.5); -o-transform: scaleX(.5); transform: scaleX(.5)}
+.MJXp-scale6 {-webkit-transform: scaleX(.6); -moz-transform: scaleX(.6); -ms-transform: scaleX(.6); -o-transform: scaleX(.6); transform: scaleX(.6)}
+.MJXp-scale7 {-webkit-transform: scaleX(.7); -moz-transform: scaleX(.7); -ms-transform: scaleX(.7); -o-transform: scaleX(.7); transform: scaleX(.7)}
+.MJXp-scale8 {-webkit-transform: scaleX(.8); -moz-transform: scaleX(.8); -ms-transform: scaleX(.8); -o-transform: scaleX(.8); transform: scaleX(.8)}
+.MJXp-scale9 {-webkit-transform: scaleX(.9); -moz-transform: scaleX(.9); -ms-transform: scaleX(.9); -o-transform: scaleX(.9); transform: scaleX(.9)}
+.MathJax_PHTML .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}
+</style><style type="text/css">@font-face {
+  font-family: 'rbicon';
+  src: url(chrome-extension://dipiagiiohfljcicegpgffpbnjmgjcnf/fonts/rbicon.woff2) format("woff2");
+  font-weight: normal;
+  font-style: normal; }
+</style></head>
+<body><div id="MathJax_Message" style="display: none;"></div>
+<a name="top"></a>
+
+
+<!--done-->
+<div id="header">
+	
+<!--done-->
+<div class="header">
+	<div class="headerText">
+		<a id="Header1_HeaderTitle" class="headermaintitle" href="https://www.cnblogs.com/robert-dlut/">robert_ai</a><br>
+		Tell me, I will forget; Show me, I may remember; Involve me, I will understand. (Home Page: https://lingluodlut.github.io/)
+	</div>
+</div>
+
+</div>
+
+<div id="mytopmenu">
+	
+		<div id="mylinks"><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">博客园</a> &nbsp;
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/robert-dlut/">首页</a> &nbsp;
+<a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a> &nbsp;
+<a id="blog_nav_contact" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/robert_ai">联系</a> &nbsp;
+<a id="blog_nav_rss" class="menu" href="https://www.cnblogs.com/robert-dlut/rss">订阅</a><a id="blog_nav_rss_image" href="https://www.cnblogs.com/robert-dlut/rss"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/xml.gif" alt="订阅"></a>&nbsp;
+<a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a>
+</div>
+		<div id="mystats"><div id="blog_stats">
+随笔-27&nbsp;
+评论-68&nbsp;
+文章-2&nbsp;
+<!--trackbacks-0-->
+</div></div>
+	
+</div>
+<div id="centercontent">
+	
+        <div id="post_detail">
+<div class="post">
+	<h1 class="postTitle"><a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/robert-dlut/p/5952032.html">注意力机制（Attention Mechanism）在自然语言处理中的应用</a></h1>
+	<div id="cnblogs_post_body" class="blogpost-body"><p style="text-align: center"><span style="font-family: 黑体; font-size: 15pt">注意力机制（Attention Mechanism）在自然语言处理中的应用 </span></p>
+<p><span style="font-family: 宋体"><span style="font-family: Microsoft YaHei">&nbsp;&nbsp;&nbsp; 近年来，深度学习的研究越来越深入，在各个领域也都获得了不少突破性的进展。基于注意力（attention）机制的神经网络成为了最近神经网络研究的一个热点，本人最近也学习了一些基于attention机制的神经网络在自然语言处理（NLP）领域的论文，现在来对attention在NLP中的应用进行一个总结，和大家一起分享。</span> </span></p>
+<h1><span style="font-family: 宋体; font-size: 12pt"><span style="font-family: Microsoft YaHei">1 Attention研究进展</span> </span></h1>
+<p>&nbsp;&nbsp;&nbsp; Attention机制最早是在视觉图像领域提出来的，应该是在九几年思想就提出来了，但是真正火起来应该算是google mind团队的这篇论文《Recurrent Models of Visual Attention》[14]，他们在RNN模型上使用了attention机制来进行图像分类。随后，Bahdanau等人在论文《Neural Machine Translation by Jointly Learning to Align and Translate》 [1]中，使用类似attention的机制在机器翻译任务上将翻译和对齐同时进行，他们的工作算是是第一个提出attention机制应用到NLP领域中。接着类似的基于attention机制的RNN模型扩展开始应用到各种NLP任务中。最近，如何在CNN中使用attention机制也成为了大家的研究热点。下图表示了attention研究进展的大概趋势。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111501343-1669960587.png" alt=""></p>
+<h1><span style="font-family: 宋体; font-size: 12pt"><span style="font-family: Microsoft YaHei">2 Recurrent Models of Visual Attention</span> </span></h1>
+<p>&nbsp;&nbsp;&nbsp; 在介绍NLP中的Attention之前，我想大致说一下图像中使用attention的思想。就具代表性的这篇论文《Recurrent Models of Visual Attention》 [14]，他们研究的动机其实也是受到人类注意力机制的启发。人们在进行观察图像的时候，其实并不是一次就把整幅图像的每个位置像素都看过，大多是根据需求将注意力集中到图像的特定部分。而且人类会根据之前观察的图像学习到未来要观察图像注意力应该集中的位置。下图是这篇论文的核心模型示意图。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111502375-2099469126.png" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp; 该模型是在传统的RNN上加入了attention机制（即红圈圈出来的部分），通过attention去学习一幅图像要处理的部分，每次当前状态，都会根据前一个状态学习得到的要关注的位置<em>l</em>和当前输入的图像，去处理注意力部分像素，而不是图像的全部像素。这样的好处就是更少的像素需要处理，减少了任务的复杂度。可以看到图像中应用attention和人类的注意力机制是很类似的，接下来我们看看在NLP中使用的attention。</p>
+<h1><span style="font-family: 宋体; font-size: 12pt"><span style="font-family: Microsoft YaHei">3 Attention-based RNN in NLP</span> </span></h1>
+<h2><span style="font-size: 10pt">3.1 Neural Machine Translation by Jointly Learning to Align and Translate [1] </span></h2>
+<p>&nbsp;&nbsp;&nbsp; 这篇论文算是在NLP中第一个使用attention机制的工作。他们把attention机制用到了神经网络机器翻译（NMT）上，NMT其实就是一个典型的sequence to sequence模型，也就是一个encoder to decoder模型，传统的NMT使用两个RNN，一个RNN对源语言进行编码，将源语言编码到一个固定维度的中间向量，然后在使用一个RNN进行解码翻译到目标语言，传统的模型如下图：</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111502937-1550553767.png" alt=""></p>
+<p>这篇论文提出了基于attention机制的NMT，模型大致如下图：</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111503843-584496480.png" alt=""></p>
+<p>图中我并没有把解码器中的所有连线画玩，只画了前两个词，后面的词其实都一样。可以看到基于attention的NMT在传统的基础上，它把源语言端的每个词学到的表达（传统的只有最后一个词后学到的表达）和当前要预测翻译的词联系了起来，这样的联系就是通过他们设计的attention进行的，在模型训练好后，根据attention矩阵，我们就可以得到源语言和目标语言的对齐矩阵了。具体论文的attention设计部分如下：</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111504671-910168246.png" alt=""></p>
+<p>可以看到他们是使用一个感知机公式来将目标语言和源语言的每个词联系了起来，然后通过soft函数将其归一化得到一个概率分布，就是attention矩阵。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111505140-1405381433.png" alt=""></p>
+<p>从结果来看相比传统的NMT（RNNsearch是attention NMT，RNNenc是传统NMT）效果提升了不少，最大的特点还在于它可以可视化对齐，并且在长句的处理上更有优势。</p>
+<h2><span style="font-size: 10pt">3.2 Effective Approaches to Attention-based Neural Machine Translation [2] </span></h2>
+<p>&nbsp;&nbsp;&nbsp; 这篇论文是继上一篇论文后，一篇很具代表性的论文，他们的工作告诉了大家attention在RNN中可以如何进行扩展，这篇论文对后续各种基于attention的模型在NLP应用起到了很大的促进作用。在论文中他们提出了两种attention机制，一种是全局（global）机制，一种是局部（local）机制。</p>
+<p>&nbsp;&nbsp;&nbsp; 首先我们来看看global机制的attention，其实这和上一篇论文提出的attention的思路是一样的，它都是对源语言对所有词进行处理，不同的是在计算attention矩阵值的时候，他提出了几种简单的扩展版本。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111506078-902266845.png" alt=""> <img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111506546-70229027.png" alt=""></p>
+<p>在他们最后的实验中general的计算方法效果是最好的。</p>
+<p>&nbsp;&nbsp;&nbsp; 我们再来看一下他们提出的local版本。主要思路是为了减少attention计算时的耗费，作者在计算attention时并不是去考虑源语言端的所有词，而是根据一个预测函数，先预测当前解码时要对齐的源语言端的位置Pt，然后通过上下文窗口，仅考虑窗口内的词。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111507500-812049044.png" alt=""></p>
+<p>里面给出了两种预测方法，local-m和local-p，再计算最后的attention矩阵时，在原来的基础上去乘了一个pt位置相关的高斯分布。作者的实验结果是局部的比全局的attention效果好。</p>
+<p>这篇论文最大的贡献我觉得是首先告诉了我们可以如何扩展attention的计算方式，还有就是局部的attention方法。</p>
+<h1><span style="font-family: 宋体; font-size: 12pt"><span style="font-family: Microsoft YaHei">4 Attention-based CNN in NLP</span> </span></h1>
+<p>&nbsp;&nbsp;&nbsp; 随后基于Attention的RNN模型开始在NLP中广泛应用，不仅仅是序列到序列模型，各种分类问题都可以使用这样的模型。那么在深度学习中与RNN同样流行的卷积神经网络CNN是否也可以使用attention机制呢？《ABCNN: Attention-Based Convolutional Neural Network for Modeling Sentence Pairs》 [13]这篇论文就提出了3中在CNN中使用attention的方法，是attention在CNN中较早的探索性工作。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111508218-1295529232.png" alt=""></p>
+<p>传统的CNN在构建句对模型时如上图，通过每个单通道处理一个句子，然后学习句子表达，最后一起输入到分类器中。这样的模型在输入分类器前句对间是没有相互联系的，作者们就想通过设计attention机制将不同cnn通道的句对联系起来。</p>
+<p>&nbsp;&nbsp;&nbsp; 第一种方法ABCNN0-1是在卷积前进行attention，通过attention矩阵计算出相应句对的attention feature map，然后连同原来的feature map一起输入到卷积层。具体的计算方法如下。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111509265-808480223.png" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp; 第二种方法ABCNN-2是在池化时进行attention，通过attention对卷积后的表达重新加权，然后再进行池化，原理如下图。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111510078-1490972209.png" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp; 第三种就是把前两种方法一起用到CNN中，如下图</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111510750-1137702886.png" alt=""></p>
+<p>这篇论文提供了我们在CNN中使用attention的思路。现在也有不少使用基于attention的CNN工作，并取得了不错的效果。</p>
+<h1><span style="font-family: 宋体; font-size: 12pt"><span style="font-family: Microsoft YaHei">5 总结</span> </span></h1>
+<p>&nbsp;&nbsp;&nbsp; 最后进行一下总结。Attention在NLP中其实我觉得可以看成是一种自动加权，它可以把两个你想要联系起来的不同模块，通过加权的形式进行联系。目前主流的计算公式有以下几种：</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111511390-885545526.png" alt=""></p>
+<p>通过设计一个函数将目标模块mt和源模块ms联系起来，然后通过一个soft函数将其归一化得到概率分布。</p>
+<p>&nbsp;&nbsp;&nbsp; 目前Attention在NLP中已经有广泛的应用。它有一个很大的优点就是可以可视化attention矩阵来告诉大家神经网络在进行任务时关注了哪些部分。</p>
+<p style="text-align: center"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/670089-20161012111512000-2137971007.png" alt=""></p>
+<p>&nbsp;&nbsp;&nbsp; 不过在NLP中的attention机制和人类的attention机制还是有所区别，它基本还是需要计算所有要处理的对象，并额外用一个矩阵去存储其权重，其实增加了开销。而不是像人类一样可以忽略不想关注的部分，只去处理关注的部分。</p>
+<p>&nbsp;</p>
+<p>参考文献</p>
+<p><span style="font-size: 9pt">[1] Bahdanau, D., Cho, K. &amp; Bengio, Y. Neural Machine Translation by Jointly Learning to Align and Translate. Iclr 2015 1–15 (2014). </span></p>
+<p><span style="font-size: 9pt">[2] Luong, M. &amp; Manning, C. D. Effective Approaches to Attention-based Neural Machine Translation. 1412–1421 (2015). </span></p>
+<p><span style="font-size: 9pt">[3] Rush, A. M. &amp; Weston, J. A Neural Attention Model for Abstractive Sentence Summarization. EMNLP (2015). </span></p>
+<p><span style="font-size: 9pt">[4] Allamanis, M., Peng, H. &amp; Sutton, C. A Convolutional Attention Network for Extreme Summarization of Source Code. Arxiv (2016). </span></p>
+<p><span style="font-size: 9pt">[5] Hermann, K. M. et al. Teaching Machines to Read and Comprehend. arXiv 1–13 (2015). </span></p>
+<p><span style="font-size: 9pt">[6] Yin, W., Ebert, S. &amp; Schütze, H. Attention-Based Convolutional Neural Network for Machine Comprehension. 7 (2016). </span></p>
+<p><span style="font-size: 9pt">[7] Kadlec, R., Schmid, M., Bajgar, O. &amp; Kleindienst, J. Text Understanding with the Attention Sum Reader Network. arXiv:1603.01547v1 [cs.CL] (2016). </span></p>
+<p><span style="font-size: 9pt">[8] Dhingra, B., Liu, H., Cohen, W. W. &amp; Salakhutdinov, R. Gated-Attention Readers for Text Comprehension. (2016). </span></p>
+<p><span style="font-size: 9pt">[9] Vinyals, O. et al. Grammar as a Foreign Language. arXiv 1–10 (2015). </span></p>
+<p><span style="font-size: 9pt">[10]&nbsp;&nbsp;&nbsp;&nbsp;Wang, L., Cao, Z., De Melo, G. &amp; Liu, Z. Relation Classification via Multi-Level Attention CNNs. Acl 1298–1307 (2016). </span></p>
+<p><span style="font-size: 9pt">[11]&nbsp;&nbsp;&nbsp;&nbsp;Zhou, P. et al. Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification. Proc. 54th Annu. Meet. Assoc. Comput. Linguist. (Volume 2 Short Pap. 207–212 (2016). </span></p>
+<p><span style="font-size: 9pt">[12]&nbsp;&nbsp;&nbsp;&nbsp;Yang, Z. et al. Hierarchical Attention Networks for Document Classification. Naacl (2016). </span></p>
+<p><span style="font-size: 9pt">[13] Yin W, Schütze H, Xiang B, et al. Abcnn: Attention-based convolutional neural network for modeling sentence pairs. arXiv preprint arXiv:1512.05193, 2015. </span></p>
+<p><span style="font-size: 9pt">[14] Mnih V, Heess N, Graves A. Recurrent models of visual attention[C]//Advances in Neural Information Processing Systems. 2014: 2204-2212. </span></p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory">分类: <a href="https://www.cnblogs.com/robert-dlut/category/705804.html" target="_blank">Deep Learning</a>,<a href="https://www.cnblogs.com/robert-dlut/category/637223.html" target="_blank">NLP</a></div>
+<div id="EntryTag">标签: <a href="https://www.cnblogs.com/robert-dlut/tag/attention/">attention</a>, <a href="https://www.cnblogs.com/robert-dlut/tag/Deep%20Learning/">Deep Learning</a>, <a href="https://www.cnblogs.com/robert-dlut/tag/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a>, <a href="https://www.cnblogs.com/robert-dlut/tag/%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%BA%E5%88%B6/">注意力机制</a>, <a href="https://www.cnblogs.com/robert-dlut/tag/NLP/">NLP</a>, <a href="https://www.cnblogs.com/robert-dlut/tag/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">自然语言处理</a></div>
+<div id="blog_post_info"><div id="green_channel">
+        <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(5952032,cb_blogId,1);green_channel_success(this,&#39;谢谢推荐！&#39;);">好文要顶</a>
+            <a id="green_channel_follow" onclick="follow(&#39;1b972825-ac34-e411-b908-9dcfd8948a71&#39;);" href="javascript:void(0);">关注我</a>
+    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/icon_weibo_24.png" alt=""></a>
+    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/wechat.png" alt=""></a>
+</div>
+<div id="author_profile">
+    <div id="author_profile_info" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/robert-dlut/" target="_blank"><img src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/20160626161711.png" class="author_avatar" alt=""></a>
+        <div id="author_profile_detail" class="author_profile_info">
+            <a href="http://home.cnblogs.com/u/robert-dlut/">robert_ai</a><br>
+            <a href="http://home.cnblogs.com/u/robert-dlut/followees">关注 - 2</a><br>
+            <a href="http://home.cnblogs.com/u/robert-dlut/followers">粉丝 - 99</a>
+        </div>
+    </div>
+    <div class="clear"></div>
+    <div id="author_profile_honor"></div>
+    <div id="author_profile_follow">
+                <a href="javascript:void(0);" onclick="follow(&#39;1b972825-ac34-e411-b908-9dcfd8948a71&#39;);return false;">+加关注</a>
+    </div>
+</div>
+<div id="div_digg">
+    <div class="diggit" onclick="votePost(5952032,&#39;Digg&#39;)">
+        <span class="diggnum" id="digg_count">9</span>
+    </div>
+    <div class="buryit" onclick="votePost(5952032,&#39;Bury&#39;)">
+        <span class="burynum" id="bury_count">0</span>
+    </div>
+    <div class="clear"></div>
+    <div class="diggword" id="digg_tips">
+    </div>
+</div>
+<script type="text/javascript">
+    currentDiggType = 0;
+</script></div>
+<div class="clear"></div>
+<div id="post_next_prev"><a href="https://www.cnblogs.com/robert-dlut/p/5617466.html" class="p_n_p_prefix">« </a> 上一篇：<a href="https://www.cnblogs.com/robert-dlut/p/5617466.html" title="发布于2016-06-26 10:32">如何产生好的词向量</a><br><a href="https://www.cnblogs.com/robert-dlut/p/6586621.html" class="p_n_p_prefix">» </a> 下一篇：<a href="https://www.cnblogs.com/robert-dlut/p/6586621.html" title="发布于2017-03-20 10:45">使用维基百科训练简体中文词向量</a><br></div>
+</div>
+
+
+	<div class="postDesc">posted on <span id="post-date">2016-10-12 11:15</span> <a href="https://www.cnblogs.com/robert-dlut/">robert_ai</a> 阅读(<span id="post_view_count">36571</span>) 评论(<span id="post_comment_count">8</span>)  <a href="https://i.cnblogs.com/EditPosts.aspx?postid=5952032" rel="nofollow">编辑</a> <a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#" onclick="AddToWz(5952032);return false;">收藏</a></div>
+</div>
+<script type="text/javascript">var allowComments=true,cb_blogId=197272,cb_entryId=5952032,cb_blogApp=currentBlogApp,cb_blogUserGuid='1b972825-ac34-e411-b908-9dcfd8948a71',cb_entryCreatedDate='2016/10/12 11:15:00';loadViewCount(cb_entryId);var cb_postType=1;var isMarkdown=false;</script>
+
+</div><a name="!comments"></a><div id="blog-comments-placeholder"><div id="comments_pager_top"></div>
+<!--done-->
+<br>
+<b>评论:</b>
+<div class="feedbackNoItems"></div>
+	
+
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3534804" class="layer">#1楼</a><a name="3534804" id="comment_anchor_3534804"></a>
+				 <span class="comment_date">2016-10-18 12:41</span> | <a id="a_comment_author_3534804" href="http://home.cnblogs.com/u/1044868/" target="_blank">分析挖掘机</a> <a href="http://msg.cnblogs.com/send/%E5%88%86%E6%9E%90%E6%8C%96%E6%8E%98%E6%9C%BA" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3534804" class="blog_comment_body">申请转载至微信公众号大数据分析挖掘</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3534804,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3534804,&#39;Bury&#39;,this)">反对(0)</a></div>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3534865" class="layer">#2楼</a><a name="3534865" id="comment_anchor_3534865"></a>[<span class="louzhu">楼主</span>]
+				 <span class="comment_date">2016-10-18 13:33</span> | <a id="a_comment_author_3534865" href="https://www.cnblogs.com/robert-dlut/" target="_blank">robert_ai</a> <a href="http://msg.cnblogs.com/send/robert_ai" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3534865" class="blog_comment_body"><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3534804" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3534804);">@</a>
+分析挖掘机<br>好的，谢谢。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3534865,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3534865,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3534865_avatar" style="display:none;">http://pic.cnblogs.com/face/670089/20160626161711.png</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3579322" class="layer">#3楼</a><a name="3579322" id="comment_anchor_3579322"></a>
+				 <span class="comment_date">2016-12-13 13:54</span> | <a id="a_comment_author_3579322" href="https://www.cnblogs.com/jianzhitanqiao/" target="_blank">洞明</a> <a href="http://msg.cnblogs.com/send/%E6%B4%9E%E6%98%8E" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3579322" class="blog_comment_body">博主的博客中，作图风格很统一，赞！<br>请问，博主是用什么作图的？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3579322,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3579322,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3579322_avatar" style="display:none;">http://pic.cnblogs.com/face/u338483.jpg?id=07234946</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3579475" class="layer">#4楼</a><a name="3579475" id="comment_anchor_3579475"></a>[<span class="louzhu">楼主</span>]
+				 <span class="comment_date">2016-12-13 16:01</span> | <a id="a_comment_author_3579475" href="https://www.cnblogs.com/robert-dlut/" target="_blank">robert_ai</a> <a href="http://msg.cnblogs.com/send/robert_ai" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3579475" class="blog_comment_body"><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3579322" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3579322);">@</a>
+洞明<br>我用PPT做的~</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3579475,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3579475,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3579475_avatar" style="display:none;">http://pic.cnblogs.com/face/670089/20160626161711.png</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3725505" class="layer">#5楼</a><a name="3725505" id="comment_anchor_3725505"></a>
+				 <span class="comment_date">2017-06-29 17:11</span> | <a id="a_comment_author_3725505" href="https://www.cnblogs.com/my0154/" target="_blank">职涯有乐</a> <a href="http://msg.cnblogs.com/send/%E8%81%8C%E6%B6%AF%E6%9C%89%E4%B9%90" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3725505" class="blog_comment_body">毛遂自荐，我是猎头，正好有个相关的职位招聘，欢迎咨询：qq 3091309630 邮箱：davi@andxy.cn。大家有兴趣也欢迎关注公众号：职涯有乐（topjob100）。平台提供值招聘、名企业、乐文章优质内容，适时发布IT/互联网金融行业topjob100岗位招聘信息，希望通过我的努力给大家的工作带来方便。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3725505,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3725505,&#39;Bury&#39;,this)">反对(0)</a></div>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3964553" class="layer">#6楼</a><a name="3964553" id="comment_anchor_3964553"></a>
+				 <span class="comment_date">2018-04-30 11:39</span> | <a id="a_comment_author_3964553" href="http://home.cnblogs.com/u/412034/" target="_blank">千里缘</a> <a href="http://msg.cnblogs.com/send/%E5%8D%83%E9%87%8C%E7%BC%98" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3964553" class="blog_comment_body">大神请教个问题，在计算attention矩阵的aij时用到了eij，这个是什么值呢？</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3964553,&#39;Digg&#39;,this)">支持(1)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3964553,&#39;Bury&#39;,this)">反对(0)</a></div>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3964834" class="layer">#7楼</a><a name="3964834" id="comment_anchor_3964834"></a>[<span class="louzhu">楼主</span>]
+				 <span class="comment_date">2018-05-01 08:45</span> | <a id="a_comment_author_3964834" href="https://www.cnblogs.com/robert-dlut/" target="_blank">robert_ai</a> <a href="http://msg.cnblogs.com/send/robert_ai" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_3964834" class="blog_comment_body"><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#3964553" title="查看所回复的评论" onclick="commentManager.renderComments(0,50,3964553);">@</a>
+千里缘<br>你好，不同的论文实现的eij不同，一般点积，感知机等是常用的方式，主要就是计算出目标端和源端的对齐函数得分。然后一般再经过一个softmax进行归一化就得到attention权重了。</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(3964834,&#39;Digg&#39;,this)">支持(1)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(3964834,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_3964834_avatar" style="display:none;">http://pic.cnblogs.com/face/670089/20160626161711.png</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+		<div class="feedbackItem">
+			<div class="feedbackListSubtitle">
+			<a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#4017931" class="layer">#8楼</a><a name="4017931" id="comment_anchor_4017931"></a><span id="comment-maxId" style="display:none;">4017931</span><span id="comment-maxDate" style="display:none;">2018/7/11 14:16:50</span>
+				 <span class="comment_date">2018-07-11 14:16</span> | <a id="a_comment_author_4017931" href="https://www.cnblogs.com/wuyuefei/" target="_blank">我乐飞</a> <a href="http://msg.cnblogs.com/send/%E6%88%91%E4%B9%90%E9%A3%9E" title="发送站内短消息" class="sendMsg2This">&nbsp;</a><br>
+				<div align="left"><div id="comment_body_4017931" class="blog_comment_body">很系统，很好的介绍attention的文章，感谢博主</div><div class="comment_vote"><a href="javascript:void(0);" class="comment_digg" onclick="return voteComment(4017931,&#39;Digg&#39;,this)">支持(0)</a><a href="javascript:void(0);" class="comment_bury" onclick="return voteComment(4017931,&#39;Bury&#39;,this)">反对(0)</a></div><span id="comment_4017931_avatar" style="display:none;">http://pic.cnblogs.com/face/1257291/20180720154058.png</span>&nbsp;&nbsp;<span class="comment_actions"></span></div>
+			</div>
+			
+			
+		</div>
+	
+
+
+
+<div id="comments_pager_bottom"></div></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id="comment_form" class="commentform">
+<a name="commentform"></a>
+<div id="divCommentShow"></div>
+<div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#" onclick="return RefreshPage();">刷新页面</a><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html#top">返回顶部</a></div>
+<div id="comment_form_container"><div class="login_tips">注册用户登录后才能发表评论，请 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return login(&#39;commentform&#39;);">登录</a> 或 <a rel="nofollow" href="javascript:void(0);" class="underline" onclick="return register();">注册</a>，<a href="http://www.cnblogs.com/">访问</a>网站首页。</div></div>
+<div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+<div id="ad_t2"><a href="http://www.ucancode.com/index.htm" target="_blank" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;Link&#39;, &#39;click&#39;, &#39;T2-工控&#39;)">【推荐】超50万VC++源码: 大型组态工控、电力仿真CAD与GIS源码库！</a><br></div>
+<div id="opt_under_post"></div>
+<script async="async" src="./注意力机制（Attention Mechanism）在自然语言处理中的应用 - robert_ai - 博客园_files/gpt.js.下载"></script>
+<script>
+  var googletag = googletag || {};
+  googletag.cmd = googletag.cmd || [];
+</script>
+<script>
+  googletag.cmd.push(function() {
+        googletag.defineSlot('/1090369/C1', [300, 250], 'div-gpt-ad-1546353474406-0').addService(googletag.pubads());
+        googletag.defineSlot('/1090369/C2', [468, 60], 'div-gpt-ad-1539008685004-0').addService(googletag.pubads());
+        googletag.pubads().enableSingleRequest();
+        googletag.enableServices();
+  });
+</script>
+<div id="cnblogs_c1" class="c_ad_block">
+    <div id="div-gpt-ad-1546353474406-0" style="height:250px; width:300px;"></div>
+</div>
+<div id="under_post_news"><div class="itnews c_ad_block"><b>相关博文：</b><br>·  <a href="https://www.cnblogs.com/lzhy-35/p/7168556.html" target="_blank" onclick="clickRecomItmem(7168556,&#39;f4nPQ8+5OgCl3DSDgVbDVoxFXQAlnYpExeg0i+uJ+fLmmk7ue7AaH304ynQgyl8RBFGG7eeBzoDGQqhRbzWjsk1e+iRqgCoCib2tG9bIIzy115rw53I2+IjRAQ1fqD3XkVhZaMjjybaKNsD5jhkWiWWsZX+4YszF65ZLR3MQ+qBEVVzEtgwvIzSfPQHcDNhJ&#39;)">自然语言处理Attention Model</a><br>·  <a href="https://www.cnblogs.com/yymn/articles/5232212.html" target="_blank" onclick="clickRecomItmem(5232212,&#39;2W8D8n5PobntQsn7kDbM4dI6OBtcEi88wUnWbMgk5lrs8FO+yxafJwuBUoaotkHN5iWqUynQV47Yxvq323dBrVrpm1RNhrBm9TJ85ZYXg7JLyQ1x8zVhq1XKx2j28YkVWBdh+m0J54SoDxzaFH71uxbLE1YMOKJmdHuqy1YDgjqW36ypd2SDYSQnyZW//hE=&#39;)">深度学习和自然语言处理中的attention和memory机制</a><br>·  <a href="https://www.cnblogs.com/hanpu0725/archive/2010/04/18/1714946.html" target="_blank" onclick="clickRecomItmem(1714946,&#39;K3ML9ksTwVMcl9uFc4lhhvl4VZn0khhvdBOcQhopds9IoUKwxpd1fbc1II9JDkdl71ixfcCcYkVT2Jf84xxwl9NOQINuYC2klxoNE8Mir94iFghNAtfjF/TuYapqZz9OpgsqArFcGqnU3J4rwDlKCgH64EHiCsrWoQuX5J7gtVd8zA==&#39;)">【转】HMM在自然语言处理中的应用</a><br>·  <a href="https://www.cnblogs.com/DjangoBlog/p/7884669.html" target="_blank" onclick="clickRecomItmem(7884669,&#39;Mt0fZ2p+Twrq0v/1qEbxeTQoDX1/bZ3J1cuVanEBxbg+mOLPrzBgil60oTCdih3OG78NIyLznwWEba6WHMeqp0/+zWC1VEzVRHa6EmJbuZoKol8OZO9GAkOhma7OSP1BPYtdlmXPEsVVr3A+ra0A2BLcicMeq3NO++mmF3hqg8j1EotV7ZFfNgIYpG5lknPY&#39;)">深度学习中的注意力机制</a><br>·  <a href="https://www.cnblogs.com/liangqihui/p/6730970.html" target="_blank" onclick="clickRecomItmem(6730970,&#39;ImWZ+OtCsim5cL8ZGn8oRilP//8QRMvF7oiNe6zJevLu0dEFhm9oCFkm1fY36Ss+7tZq1Cj5EoHA5eto0j+y81hJ3HPqBnvPrgGBpEgak8DOTcrzOqYC9shpbJwSixkAYj+2oTv3MeXb9Jf4iuIif9VvYOMqPHgxUCtMC+qhTtWkm2YEhFwU+dBKLEbsP71/&#39;)">NLTK在自然语言处理</a><br></div></div>
+<div id="cnblogs_c2" class="c_ad_block">
+    <div id="div-gpt-ad-1539008685004-0" style="height:60px; width:468px;"></div>
+</div>
+<div id="under_post_kb"><div class="itnews c_ad_block"><b>最新新闻</b>：<br> ·  <a href="https://news.cnblogs.com/n/618197/" target="_blank">半小时不到，2019支付宝五福已有25700多人集齐</a><br> ·  <a href="https://news.cnblogs.com/n/618196/" target="_blank">苹果自动驾驶项目，黄了吗</a><br> ·  <a href="https://news.cnblogs.com/n/618195/" target="_blank">AI电话营销兴起 你接到的骚扰电话可能不是人打的</a><br> ·  <a href="https://news.cnblogs.com/n/618194/" target="_blank">扎克伯格妻子：我们的慈善组织不与FB分享数据</a><br> ·  <a href="https://news.cnblogs.com/n/618193/" target="_blank">微软宣布必应中国访问已恢复正常，未透露原因</a><br>» <a href="http://news.cnblogs.com/" title="IT新闻" target="_blank">更多新闻...</a></div></div>
+<div id="HistoryToday" class="c_ad_block"></div>
+<script type="text/javascript">
+ if(enablePostBottom()) {
+    codeHighlight();
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverT2();
+    deliverC1();
+    deliverC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);  
+}
+</script>
+</div>
+
+    
+</div>
+<div id="leftcontent">
+	
+		<div id="leftcontentcontainer">
+			
+<!--done-->
+<div class="newsItem">
+	<div id="blog-news"><div id="profile_block">昵称：<a href="https://home.cnblogs.com/u/robert-dlut/">robert_ai</a><br>园龄：<a href="https://home.cnblogs.com/u/robert-dlut/" title="入园时间：2014-09-05">4年4个月</a><br>粉丝：<a href="https://home.cnblogs.com/u/robert-dlut/followers/">99</a><br>关注：<a href="https://home.cnblogs.com/u/robert-dlut/followees/">2</a><div id="p_b_follow"><a href="javascript:void(0);" onclick="follow(&#39;1b972825-ac34-e411-b908-9dcfd8948a71&#39;)">+加关注</a></div><script>getFollowStatus('1b972825-ac34-e411-b908-9dcfd8948a71')</script></div></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+
+			<div id="blog-calendar" style=""><table id="blogCalendar" class="Cal" cellspacing="0" cellpadding="0" title="Calendar">
+	<tbody><tr><td colspan="7"><table class="CalTitle" cellspacing="0">
+		<tbody><tr><td class="CalNextPrev"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2018/12/01&#39;);return false;">&lt;</a></td><td align="center">2019年1月</td><td class="CalNextPrev" align="right"><a href="javascript:void(0);" onclick="loadBlogCalendar(&#39;2019/02/01&#39;);return false;">&gt;</a></td></tr>
+	</tbody></table></td></tr><tr><th class="CalDayHeader" align="center" abbr="日" scope="col">日</th><th class="CalDayHeader" align="center" abbr="一" scope="col">一</th><th class="CalDayHeader" align="center" abbr="二" scope="col">二</th><th class="CalDayHeader" align="center" abbr="三" scope="col">三</th><th class="CalDayHeader" align="center" abbr="四" scope="col">四</th><th class="CalDayHeader" align="center" abbr="五" scope="col">五</th><th class="CalDayHeader" align="center" abbr="六" scope="col">六</th></tr><tr><td class="CalOtherMonthDay" align="center">30</td><td class="CalOtherMonthDay" align="center">31</td><td align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">4</td><td class="CalWeekendDay" align="center">5</td></tr><tr><td class="CalWeekendDay" align="center">6</td><td align="center">7</td><td align="center">8</td><td align="center">9</td><td align="center">10</td><td align="center">11</td><td class="CalWeekendDay" align="center">12</td></tr><tr><td class="CalWeekendDay" align="center">13</td><td align="center">14</td><td align="center">15</td><td align="center">16</td><td align="center">17</td><td align="center">18</td><td class="CalWeekendDay" align="center">19</td></tr><tr><td class="CalWeekendDay" align="center">20</td><td align="center">21</td><td align="center">22</td><td align="center">23</td><td align="center">24</td><td class="CalTodayDay" align="center">25</td><td class="CalWeekendDay" align="center">26</td></tr><tr><td class="CalWeekendDay" align="center">27</td><td align="center">28</td><td align="center">29</td><td align="center">30</td><td align="center">31</td><td class="CalOtherMonthDay" align="center">1</td><td class="CalOtherMonthDay" align="center">2</td></tr><tr><td class="CalOtherMonthDay" align="center">3</td><td class="CalOtherMonthDay" align="center">4</td><td class="CalOtherMonthDay" align="center">5</td><td class="CalOtherMonthDay" align="center">6</td><td class="CalOtherMonthDay" align="center">7</td><td class="CalOtherMonthDay" align="center">8</td><td class="CalOtherMonthDay" align="center">9</td></tr>
+</tbody></table></div><script type="text/javascript">loadBlogDefaultCalendar();</script><br>
+			<div id="blog-sidecolumn"><div id="sidebar_search" class="sidebar-block">
+<div id="sidebar_search" class="mySearch">
+<h3 class="catListTitle">搜索</h3>
+<div id="sidebar_search_box">
+<div id="widget_my_zzk" class="div_my_zzk"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="input_my_zzk">&nbsp;<input onclick="zzk_go()" type="button" value="找找看" id="btnZzk" class="btn_my_zzk"></div>
+<div id="widget_my_google" class="div_my_zzk"><input type="text" name="google_q" id="google_q" onkeydown="return google_go_enter(event)" class="input_my_zzk">&nbsp;<input onclick="google_go()" type="button" value="谷歌搜索" class="btn_my_zzk"></div>
+</div>
+</div>
+
+</div><div id="sidebar_shortcut" class="sidebar-block">
+<h3 class="catListTitle">常用链接</h3>
+<ul>
+<li><a href="https://www.cnblogs.com/robert-dlut/p/" title="我的博客的随笔列表">我的随笔</a></li><li><a href="https://www.cnblogs.com/robert-dlut/MyComments.html" title="我发表过的评论列表">我的评论</a></li><li><a href="https://www.cnblogs.com/robert-dlut/OtherPosts.html" title="我评论过的随笔列表">我的参与</a></li><li><a href="https://www.cnblogs.com/robert-dlut/RecentComments.html" title="我的博客的评论列表">最新评论</a></li><li><a href="https://www.cnblogs.com/robert-dlut/tag/" title="我的博客的标签列表">我的标签</a></li>
+</ul>
+<div id="itemListLin_con" style="display:none;">
+
+</div></div><div id="sidebar_recentposts" class="sidebar-block">
+<h3 class="catListTitle">最新随笔</h3>
+<div class="RecentComment" id="RecentPosts">
+<ul style="word-break:break-all">
+<li><a href="https://www.cnblogs.com/robert-dlut/p/9824346.html">1. 自然语言处理中的语言模型预训练方法（ELMo、GPT和BERT）</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/9212397.html">2. 基线系统需要受到更多关注：基于词向量的简单模型</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/8638283.html">3. 自然语言处理中的自注意力机制（Self-attention Mechanism）</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/7710735.html">4. 基于神经网络的实体识别和关系抽取联合学习</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/6847401.html">5. 神经网络结构在命名实体识别（NER）中的应用</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/6586621.html">6. 使用维基百科训练简体中文词向量</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html">7. 注意力机制（Attention Mechanism）在自然语言处理中的应用</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/5617466.html">8. 如何产生好的词向量</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/5276927.html">9. 谈谈评价指标中的宏平均和微平均</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/5004514.html">10. 在NLP中深度学习模型何时需要树形结构？</a></li>
+</ul>
+</div>
+</div><div id="sidebar_toptags" class="sidebar-block">
+<h3 class="catListTitle">我的标签</h3>
+<div id="MyTag">
+<ul>
+<li><a href="https://www.cnblogs.com/robert-dlut/tag/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>(9)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/NLP/">NLP</a>(7)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a>(6)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/%E8%87%AA%E7%84%B6%E8%AF%AD%E8%A8%80%E5%A4%84%E7%90%86/">自然语言处理</a>(4)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/Deep%20Learning/">Deep Learning</a>(4)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/attention/">attention</a>(2)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">神经网络</a>(2)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/%E5%AE%9E%E4%BD%93%E8%AF%86%E5%88%AB/">实体识别</a>(1)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/%E6%95%B0%E5%AD%A6%E7%90%86%E8%AE%BA/">数学理论</a>(1)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/%E7%89%B9%E5%BE%81%E9%80%89%E6%8B%A9/">特征选择</a>(1)</li><li><a href="https://www.cnblogs.com/robert-dlut/tag/">更多</a></li>
+</ul>
+</div></div><div id="sidebar_categories">
+		<h3 class="catListTitle">随笔分类<span style="font-size:11px;font-weight:normal">(36)</span></h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_0" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/705803.html">BioNLP(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_1" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/705804.html">Deep Learning(12)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_2" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/699878.html">Machine Learning(7)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_3" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/637223.html">NLP(13)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_4" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/705801.html">Tool(2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_0_Link_5" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/649560.html">数学基础(1)</a></li>
+			
+				</ul>
+			
+	
+		<h3 class="catListTitle">随笔档案<span style="font-size:11px;font-weight:normal">(27)</span></h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_0" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2018/10.html">2018年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_1" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2018/06.html">2018年6月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_2" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2018/03.html">2018年3月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_3" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2017/10.html">2017年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_4" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2017/05.html">2017年5月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_5" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2017/03.html">2017年3月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_6" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2016/10.html">2016年10月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_7" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2016/06.html">2016年6月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_8" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2016/03.html">2016年3月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_9" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2015/11.html">2015年11月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_10" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2015/06.html">2015年6月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_11" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2015/04.html">2015年4月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_12" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2015/03.html">2015年3月 (2)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_13" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2015/02.html">2015年2月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_14" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2015/01.html">2015年1月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_15" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2014/11.html">2014年11月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_16" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2014/10.html">2014年10月 (3)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_1_Link_17" class="listitem" href="https://www.cnblogs.com/robert-dlut/archive/2014/09.html">2014年9月 (4)</a></li>
+			
+				</ul>
+			
+	
+		<h3 class="catListTitle">文章分类<span style="font-size:11px;font-weight:normal">(1)</span></h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_2_Link_0" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/613823.html">BioNLP</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_2_Link_1" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/623561.html">Deep Learning</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_2_Link_2" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/613143.html">Machine Learning(1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_2_Link_3" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/627749.html">NLP</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_2_Link_4" class="listitem" href="https://www.cnblogs.com/robert-dlut/category/621418.html">Tools</a></li>
+			
+				</ul>
+			
+	
+		<h3 class="catListTitle">文章档案<span style="font-size:11px;font-weight:normal">(2)</span></h3>
+		
+				<ul class="catList">
+			
+				<li class="catListItem"> <a id="CatList_LinkList_3_Link_0" class="listitem" href="https://www.cnblogs.com/robert-dlut/archives/2015/06.html" rel="nofollow">2015年6月 (1)</a></li>
+			
+				<li class="catListItem"> <a id="CatList_LinkList_3_Link_1" class="listitem" href="https://www.cnblogs.com/robert-dlut/archives/2015/01.html" rel="nofollow">2015年1月 (1)</a></li>
+			
+				</ul>
+			
+	
+</div><div id="sidebar_scorerank" class="sidebar-block">
+<h3>积分与排名</h3>
+<ul>
+	<li>
+		积分 -
+		45320
+	</li><li>
+		排名 -
+		11455
+	</li>
+</ul>
+</div><div id="sidebar_recentcomments" class="sidebar-block"><div id="recent_comments_wrap">
+<h3 class="catListTitle">最新评论</h3>
+<div class="RecentComment" id="RecentComments">
+	<div id="RecentCommentsBlock"><ul>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/robert-dlut/p/9824346.html#4169112">1. Re:自然语言处理中的语言模型预训练方法（ELMo、GPT和BERT）</a></li>
+        <li class="recent_comment_body">梳理得很清晰，刚接触NLP，先收藏，后研究。</li>
+        <li class="recent_comment_author">--Gradual~</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/robert-dlut/p/9824346.html#4136188">2. Re:自然语言处理中的语言模型预训练方法</a></li>
+        <li class="recent_comment_body">@mumian1你好，我已将PDF版本传到网盘，你可自行下载，里面的图片应该比较清晰。地址：...</li>
+        <li class="recent_comment_author">--robert_ai</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/robert-dlut/p/9824346.html#4135997">3. Re:自然语言处理中的语言模型预训练方法</a></li>
+        <li class="recent_comment_body">您好，请问可以发一下您博文中所使用的图片的出处到我的邮箱吗？有些细节的东西有点看不清楚。402887290@qq.com<br>万分感谢</li>
+        <li class="recent_comment_author">--mumian1</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/robert-dlut/p/8638283.html#4111399">4. Re:自然语言处理中的自注意力机制（Self-attention Mechanism）</a></li>
+        <li class="recent_comment_body">好文章</li>
+        <li class="recent_comment_author">--sbj123456789</li>
+        <li class="recent_comment_title"><a href="https://www.cnblogs.com/robert-dlut/p/6847401.html#4109873">5. Re:神经网络结构在命名实体识别（NER）中的应用</a></li>
+        <li class="recent_comment_body">楼主,总结的非常好,可以私下聊一下对这篇文章的理解不?</li>
+        <li class="recent_comment_author">--跨七海的风</li>
+</ul>
+</div>
+</div>
+</div></div><div id="sidebar_topviewedposts" class="sidebar-block"><div id="topview_posts_wrap">
+<h3 class="catListTitle">阅读排行榜</h3>
+<div class="RecentComment" id="TopViewPosts"> 
+	<div id="TopViewPostsBlock"><ul><li><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html">1. 注意力机制（Attention Mechanism）在自然语言处理中的应用(36570)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/6847401.html">2. 神经网络结构在命名实体识别（NER）中的应用(25588)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/8638283.html">3. 自然语言处理中的自注意力机制（Self-attention Mechanism）(23324)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/7710735.html">4. 基于神经网络的实体识别和关系抽取联合学习(8325)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/4048630.html">5. DL一（ML基础知识）(6415)</a></li></ul></div>
+</div>
+</div></div><div id="sidebar_topcommentedposts" class="sidebar-block"><div id="topfeedback_posts_wrap">
+<h3 class="catListTitle">评论排行榜</h3>
+<div class="RecentComment" id="TopCommentsPosts">
+	<div id="TopFeedbackPostsBlock"><ul><li><a href="https://www.cnblogs.com/robert-dlut/p/6847401.html">1. 神经网络结构在命名实体识别（NER）中的应用(28)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/6586621.html">2. 使用维基百科训练简体中文词向量(8)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html">3. 注意力机制（Attention Mechanism）在自然语言处理中的应用(8)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/9824346.html">4. 自然语言处理中的语言模型预训练方法（ELMo、GPT和BERT）(8)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/7710735.html">5. 基于神经网络的实体识别和关系抽取联合学习(7)</a></li></ul></div>
+</div></div></div><div id="sidebar_topdiggedposts" class="sidebar-block"><div id="topdigg_posts_wrap">
+<h3 class="catListTitle">推荐排行榜</h3>
+<div class="RecentComment">
+	<div id="TopDiggPostsBlock"><ul><li><a href="https://www.cnblogs.com/robert-dlut/p/5952032.html">1. 注意力机制（Attention Mechanism）在自然语言处理中的应用(9)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/9824346.html">2. 自然语言处理中的语言模型预训练方法（ELMo、GPT和BERT）(8)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/8638283.html">3. 自然语言处理中的自注意力机制（Self-attention Mechanism）(8)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/6847401.html">4. 神经网络结构在命名实体识别（NER）中的应用(6)</a></li><li><a href="https://www.cnblogs.com/robert-dlut/p/5276927.html">5. 谈谈评价指标中的宏平均和微平均(3)</a></li></ul></div>
+</div></div></div></div><script type="text/javascript">loadBlogSideColumn();</script></div>
+	
+</div>
+
+<!--done-->
+<div class="footer">
+	Powered by: <a href="http://www.cnblogs.com/">博客园</a>	模板提供：<a href="http://blog.hjenglish.com/">沪江博客</a>
+	Copyright ©2019 robert_ai
+</div>
+
+
+
+
+
+
+<div id="rememberry__extension__root" style="all: unset;"></div></body></html>

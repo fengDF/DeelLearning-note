@@ -1,0 +1,17 @@
+###		度量指标
+使用SkLEARN: sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score
+	url:https://blog.csdn.net/hlang8160/article/details/78040311
+tf.Metrics....
+
+#Tensorflow 中计算指标【注意函数对二分类和多分类的支持】
+【二分类】
+slim.metrics 针对二分类 ，多分类不适用！！--》https://blog.csdn.net/u011092156/article/details/80687215
+
+
+【多分类】！！--》混淆矩阵,处理Label:看作各个标签的二分类问题 再使用一些分类工具
+--》
+https://blog.csdn.net/sihailongwang/article/details/77527970?utm_source=blogxgwz5
+https://www.zhihu.com/question/56403549/answer/151310817
+https://blog.csdn.net/hlang8160/article/details/78040311
+
+https://blog.csdn.net/sinat_35821976/article/details/81334181

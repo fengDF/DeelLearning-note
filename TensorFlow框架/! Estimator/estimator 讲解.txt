@@ -1,0 +1,18 @@
+
+***************************** 内置Estimator 、自定义Estimator 、分布式Estimator***************************
+  	https://blog.csdn.net/u014061630/article/details/83013435
+--------------------------------------------------------------------------
+[自定义Estimator]:
+	官网案例：https://github.com/tensorflow/models/blob/master/samples/core/get_started/custom_estimator.py
+
+	https://zhuanlan.zhihu.com/p/33681224
+	https://www.cnblogs.com/huangyc/p/10341794.html
+--------------------------------------------------------------------------
+【EstimatorSpec】--三个mode函数必须返回的对象类型
+	tf.estimator.EstimatorSpec讲解：https://blog.csdn.net/qq_32806793/article/details/85010302
+--------------------------------------------------------------------------
+【Estimator.train/eval/predict】 :
+	https://blog.csdn.net/HappyRocking/article/details/80500172
+	----train(input_fn,step): input_fn是组合batch的数据集 每个item是一个batch
+		
+

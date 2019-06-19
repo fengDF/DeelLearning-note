@@ -1,0 +1,8 @@
+** **tensorflow 实现 Transformer：https://github.com/Kyubyong/transformer
+
+https://github.com/bojone/attention/blob/master/attention_tf.py
+
+NEW：使用，改造Transformer :  https://mp.weixin.qq.com/s/ZYsnE0f8c3kzGQwG-4xgqg
+TF实现Transfomers-->文本分类：https://github.com/jiangxinyang227/textClassifier/blob/master/Transformer/transformer.ipynb
+
+快速实现工具:T2T :tensor2tensor

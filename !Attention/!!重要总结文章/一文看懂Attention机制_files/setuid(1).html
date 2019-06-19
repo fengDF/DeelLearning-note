@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)http://m.tt.cn/setuid.html?u=15511635627178525 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        var uid = getQueryString('u');
+        var cookieDomain = document.domain.split('.').slice(-2).join('.');
+        if (uid) {
+            setCookie('user_id', uid, 365 * 24, cookieDomain)
+        }
+        function setCookie(name, value, expires, domain) {
+            var expTimes = expires ? (Number(expires) * 60 * 60 * 1000) : (24 * 60 * 60 * 1000) // 毫秒
+            var expDate = new Date()
+            expDate.setTime(expDate.getTime() + expTimes)
+            var expString = expires ? '; expires=' + expDate.toUTCString() : ''
+            var pathString = '; path=/'
+            var dm = '; domain=' + domain
+            document.cookie = name + '=' + encodeURI(value) + expString + pathString + dm
+        }
+        function getQueryString(name) {
+            var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return decodeURI(r[2]);
+            return null;
+        }
+    </script>
+
+
+</body></html>

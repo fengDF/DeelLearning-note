@@ -1,0 +1,21 @@
+
+****************************************TF 读取大数据集 与优化 方案*****************************************************************
+【dataset.处理：repeat,batch,shuttle...】
+		https://www.cnblogs.com/huangyc/p/10339433.html
+	---batch():  返回组合batch的数据集 元素是一个Batch!-->placeholder下 一般再转成迭代器make_initializable_iterator()-》每次取其get_next()
+	---repeat(n): 重复序列n次，为了epoches （若无参数：则一直重复）
+	
+【读取方案】
+	【placeholder】
+	【tfrecord读写】：https://blog.csdn.net/yeqiustu/article/details/79795639
+【优化方案】
+	【流水线prefetch、并行加速map】
+		https://blog.csdn.net/wangdongwei0/article/details/82991048
+		https://tensorflow.google.cn/guide/performance/datasets
+
+	1.最原始：使用placeholder + feed-dict +  generator
+         	2、使用TensorFlow的queue_runner
+      	3、tf.data API （pipline机制 ：提高使用率）*******************
+		改进：。。使用pipline(prefetch)、在CPU上并行(多线程)与处理数据(map)
+
+		【最新】***batch +pipline+Map并行一起进行：dataset.apply(tf.contrib.data.map_and_batch( 								map_func=parse_fn,batch_size=FLAGS.batch_size)

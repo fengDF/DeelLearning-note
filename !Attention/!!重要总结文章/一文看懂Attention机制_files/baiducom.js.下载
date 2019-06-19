@@ -1,0 +1,35 @@
+var _dftth5_channel_name ={ 
+ ttdetails_top:{ 
+ type:'baidu',id:'',isempty:true,mark:'u2858281',region:'',height:'' 
+ }, 
+ttdetails_articledown:{ 
+ type:'baidu',id:'',isempty:true,mark:'u2880791',region:'',height:'' 
+ }, 
+ttdetails_six:{ 
+ type:'baidu2',id:'<script type="text/javascript" src="//sh996.dftoutiao.com/common/api/ptmx0e.js?bwlyo=fffx"></script>',isempty:false,mark:'u2831117',region:'',height:'' 
+ }, 
+ttdetails_txt1:{ 
+ type:'baidu',id:'',isempty:true,mark:'',region:'',height:'' 
+ }, 
+ttdetails_txt2:{ 
+ type:'baidu',id:'',isempty:true,mark:'',region:'',height:'' 
+ }, 
+ttdetails_threeup:{ 
+ type:'baidu',id:'hcuribkki',isempty:false,mark:'u3206990',region:'',height:'' 
+ }, 
+ttdetails_threemiddle:{ 
+ type:'baidu2',id:'<script type="text/javascript" src="//sh996.dftoutiao.com/site/static/mgjds.js?qldariar=u"></script>',isempty:false,mark:'u3205201',region:'',height:'' 
+ }, 
+ttdetails_threedown:{ 
+ type:'baidu',id:'idvsjcllm',isempty:false,mark:'u3206991',region:'',height:'' 
+ }, 
+ttdetails_bottom:{ 
+ type:'sougou',id:'542151',isempty:false,mark:'',region:'',height:'' 
+ }, 
+ttdetails_tujia:{ 
+ type:'baidu',id:'',isempty:true,mark:'',region:'',height:'' 
+ }, 
+ttdetails_three:{ 
+ type:'baidu',id:'',isempty:true,mark:'',region:'',height:'' 
+ } 
+ };
