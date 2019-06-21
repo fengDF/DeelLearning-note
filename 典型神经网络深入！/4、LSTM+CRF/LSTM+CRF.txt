@@ -1,0 +1,35 @@
+LSTM-CRF 结构原理：
+	**** 从HMM到CRF到LSTM+CRF+ 解析TF CRF.py:      https://blog.csdn.net/u011724402/article/details/82078328
+
+	https://www.jianshu.com/p/566c6faace64  （pyTorch角度）
+TF CRF相关关键函数！！：
+	# 1 计算公式(4), log(p(y| X))
+crf_log_likelihood(inputs, tag_indices, sequence_lengths)
+
+------》Loss 
+
+		# 1.1 计算公式(4)中的第一项s(X, y), 即公式(2)
+crf_sequence_score(inputs, tag_indices, sequence_lengths, transition_params)
+
+
+ 			#1.1.1 计算公式(2)中的第一项
+crf_unary_score(tag_indices, sequence_lengths, inputs)
+
+
+			# 1.1.2 计算公式(2)中的第二项
+crf_binary_score(tag_indicese, sequence_lengths, transition_params)
+
+		
+
+# 1.2 计算公式(4)中的第二项log(sum)
+crf_log_norm(inputs, sequence_lengths, transition_params)
+
+
+
+		# 1.3 用于预测，输出具有最大p(y| X)条件概率的标记序列y
+viterbi_decode(score, transition_params)
+	【Loss】:
+		CRF函数+最大似然估计：tf.contrib.crf.crf_log_likelihood()---https://www.cnblogs.com/lovychen/p/8490397.html
+	从HMM到CRF到LSTM+CRF（TF实现部分）:      https://blog.csdn.net/u011724402/article/details/82078328
+	
+	

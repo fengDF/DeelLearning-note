@@ -1,0 +1,37 @@
+
+****************************损失函数*******************************
+【一、分类】
+	(1)分类任务Loss
+		二分类交叉熵损失sigmoid_cross_entropy：
+  
+		多分类交叉熵损失softmax_cross_entropy：
+
+		focal loss：------主要用于解决多分类任务中样本不平衡的现象，可以获得比softmax_cross_entropy更好				的分类效果。
+
+		dice loss: ------二分类任务时使用的loss，本质就是不断学习，使得交比并越来越大。
+
+		Connectionisttemporal classification(ctc loss):------对于预测的序列和label序列长度不一致的情况下，					可以使用ctc计算该2个序列的loss，主要用于文本分类识别和语音识别中
+		合页损失hinge_loss：-----也叫铰链损失，是svm中使用的损失函数。
+
+		编辑距离 edit loss:----优势在于类似于ctc loss可以计算2个长度不等的序列的损失
+
+		KL散度：----也叫相对熵，是描述两个概率分布P和Q差异的一种方法。它是非对称的
+		最大间隔损失large margin softmax loss:----用于拉大类间距离的损失函数，可以训练得到比传统softmax 							loss更好的分类效果。
+		中心损失center loss:------主要用于减少类内距离
+		Huber Loss和smooth L1：------备了MAE和MSE各自的优点。
+		对数双曲余弦logcosh:
+
+	(2)回归任务Loss
+		均方误差mean squareerror（MSE）和L2范数：------MSE表示了预测值与目标值之间差值的平方和然后							求平均	
+		
+		平均绝对误差meanabsolute error(MAE )和L1范数:----预测值与目标值之间差值的绝对值然后求平均
+			（MSE MAE对比：
+				MAE损失对于局外点更鲁棒，但它的导数不连续使得寻找最优解的过程低效；MSE损				失对于局外点敏感，但在优化过程中更为稳定和准确。）
+
+	##文章来源链接：https://blog.csdn.net/qq_14845119/article/details/80787753
+【重要概念】
+	（1）交叉熵 与Loss-------求目标p与预测值q之间的差距，
+		来源：相对熵KL=  -标签熵 （不变）+ 交叉熵（正好描述p,q分布差异）---》抽出作为交叉熵描述差距
+		 https://blog.csdn.net/tsyccnh/article/details/79163834  -----（信息量，熵，信息增量）
+
+
